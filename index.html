@@ -87,6 +87,18 @@
       </g>
     </symbol>
 
+    <!-- ---------- CLOUD ----------
+         Built from overlapping circles rather than one arc path. The old
+         path's arcs peaked above y=0 and got clipped flat by the viewBox;
+         circles make the highest point easy to keep inside the box (the
+         tallest lobe tops out at y=2 in a 60-unit-tall view). -->
+    <symbol id="sprite-cloud" viewBox="0 0 120 60">
+      <rect x="8" y="30" width="104" height="26" rx="13"/>
+      <circle cx="34" cy="32" r="17"/>
+      <circle cx="62" cy="24" r="22"/>
+      <circle cx="88" cy="32" r="16"/>
+    </symbol>
+
     <!-- ---------- HUMMING BIRD ---------- -->
     <symbol id="sprite-hummingbird" viewBox="0 0 100 100">
       <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
@@ -111,14 +123,14 @@
      BACKGROUND SCENERY
      ============================================================ -->
 <div class="scenery" aria-hidden="true">
-  <svg class="cloud" style="top:9%;  width:118px; animation-duration:74s;" viewBox="0 0 120 54">
-    <path d="M18 54a18 18 0 0 1 0-36 22 22 0 0 1 42-6 20 20 0 0 1 42 6 18 18 0 0 1 0 36z"/>
+  <svg class="cloud" style="top:9%;  width:118px; animation-duration:74s;" viewBox="0 0 120 60">
+    <use href="#sprite-cloud"></use>
   </svg>
-  <svg class="cloud" style="top:24%; width:86px;  animation-duration:96s; animation-delay:-30s;" viewBox="0 0 120 54">
-    <path d="M18 54a18 18 0 0 1 0-36 22 22 0 0 1 42-6 20 20 0 0 1 42 6 18 18 0 0 1 0 36z"/>
+  <svg class="cloud" style="top:24%; width:86px;  animation-duration:96s; animation-delay:-30s;" viewBox="0 0 120 60">
+    <use href="#sprite-cloud"></use>
   </svg>
-  <svg class="cloud" style="top:47%; width:140px; animation-duration:120s; animation-delay:-70s; opacity:.6;" viewBox="0 0 120 54">
-    <path d="M18 54a18 18 0 0 1 0-36 22 22 0 0 1 42-6 20 20 0 0 1 42 6 18 18 0 0 1 0 36z"/>
+  <svg class="cloud" style="top:47%; width:140px; animation-duration:120s; animation-delay:-70s; opacity:.6;" viewBox="0 0 120 60">
+    <use href="#sprite-cloud"></use>
   </svg>
 
   <svg class="hills" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice">
