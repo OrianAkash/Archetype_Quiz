@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#a8e5f7">
+  <title>Which One Are You? — Archetype Quiz</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+
+  <style>
+/* ============================================================
+   ARCHETYPE QUIZ — styles
+   Chunky outlines, flat colour, big press-down buttons.
+   Mobile first: almost everyone will do this on a phone.
+   ============================================================ */
+
+/* ---------- 1. Tokens ------------------------------------- */
+:root {
+  --ink:        #2c2340;   /* every outline in the whole site   */
+  --ink-soft:   #5b4f78;
+  --paper:      #fffdf6;
+
+  --sky-top:    #a8e5f7;
+  --sky-bottom: #dff5fb;
+  --hill-back:  #a5dd8f;
+  --hill-mid:   #7fca6b;
+  --hill-front: #63b154;
+  --cloud:      #fffdf6;
+
+  --brand:      #ff5f7e;   /* primary button */
+  --brand-lip:  #d43a5c;
+
+  /* Answer colours are fixed by POSITION, never by archetype,
+     so the palette can never leak the scoring. */
+  --ans-a:      #ef4d5c;  --ans-a-lip: #c22f3d;
+  --ans-b:      #2f95dd;  --ans-b-lip: #1c6ca6;
+  --ans-c:      #f4a72c;  --ans-c-lip: #c67e13;
+  --ans-d:      #3fb56d;  --ans-d-lip: #2a8850;
+
+  --radius:     22px;
+  --radius-pill: 999px;
+
+  --font-display: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body:    'Nunito', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ---------- 2. Base --------------------------------------- */
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 55%);
+  background-attachment: fixed;
+  min-height: 100vh;      /* fallback for iOS < 15.4 */
+  min-height: 100dvh;     /* tracks the shrinking address bar */
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;   /* no rubber-band revealing the void */
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;   /* stop iOS inflating text in landscape */
+}
+
+/* The scenery sits behind everything and never scrolls away. */
+.scenery {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.scenery .hills {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  height: 26vh;
+  min-height: 170px;
+}
+
+.cloud {
+  position: absolute;
+  fill: var(--cloud);
+  opacity: .95;
+  animation: drift 60s linear infinite;
+}
+@keyframes drift {
+  from { transform: translateX(-12vw); }
+  to   { transform: translateX(112vw); }
+}
+
+/* ---------- 3. Layout ------------------------------------- */
+.stage {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* NOT justify-content:center — when content is taller than the viewport
+     (landscape phones), centring a flex child clips its top beyond reach
+     of the scrollbar. Auto margins centre without ever clipping. */
+  justify-content: flex-start;
+  padding: 20px 16px 54px;
+}
+
+.screen { display: none; width: 100%; max-width: 460px; }
+.screen.is-active {
+  display: block;
+  margin-block: auto;
+  animation: pop .32s cubic-bezier(.34,1.4,.5,1) both;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(14px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Respect people who get motion sick. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ---------- 4. Cards & type ------------------------------- */
+.card {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 0 7px 0 var(--ink);
+  padding: 26px 22px;
+  text-align: center;
+}
+
+h1, h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0 0 10px;
+  letter-spacing: -.01em;
+}
+h1 { font-size: clamp(30px, 8vw, 42px); }
+h2 { font-size: clamp(21px, 5.4vw, 27px); }
+
+p  { margin: 0 0 14px; line-height: 1.5; font-size: 16px; color: var(--ink-soft); }
+p:last-child { margin-bottom: 0; }
+
+/* ---------- 5. Buttons ------------------------------------ */
+.btn {
+  display: block;
+  width: 100%;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  color: #fff;
+  background: var(--brand);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 6px 0 var(--brand-lip);
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
+  -webkit-appearance: none;
+  touch-action: manipulation;   /* kills the 300ms tap delay + double-tap zoom */
+}
+/* Guarded: on touch screens an unguarded :hover sticks after a tap. */
+@media (hover: hover) {
+  .btn:hover:not(:disabled) { filter: brightness(1.05); }
+}
+.btn:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--brand-lip);
+}
+.btn:focus-visible { outline: 4px solid #1b6fd6; outline-offset: 3px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: 0 6px 0 var(--brand-lip); }
+
+.btn--ghost {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 6px 0 #cfc6de;
+  font-size: 16px;
+  padding: 11px 18px;
+}
+.btn--ghost:active:not(:disabled) { box-shadow: 0 1px 0 #cfc6de; }
+
+/* ---------- 6. Welcome screen ----------------------------- */
+.mascots {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 4px;
+  margin-bottom: -14px;
+  position: relative;
+  z-index: 2;
+}
+.mascots svg {
+  width: 74px; height: 74px;
+  filter: drop-shadow(0 3px 0 rgba(44,35,64,.16));
+  animation: bob 3.4s ease-in-out infinite;
+}
+.mascots svg:nth-child(2) { animation-delay: .28s; }
+.mascots svg:nth-child(3) { animation-delay: .56s; }
+.mascots svg:nth-child(4) { animation-delay: .84s; }
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0)    rotate(-1.5deg); }
+  50%      { transform: translateY(-9px) rotate(1.5deg); }
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: #ffe08a;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 5px 15px;
+  margin-bottom: 14px;
+  transform: rotate(-2deg);
+}
+
+/* ---------- 7. Name form ---------------------------------- */
+.field { text-align: left; margin-bottom: 16px; }
+
+.field label {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.field .hint { font-weight: 400; font-size: 13px; color: var(--ink-soft); }
+
+.field input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 17px;               /* 16px+ stops iOS auto-zoom on focus */
+  color: var(--ink);
+  background: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 0 4px 0 #cfc6de;
+  padding: 12px 14px;
+  touch-action: manipulation;
+}
+.field input:focus { outline: 4px solid #1b6fd6; outline-offset: 2px; }
+.field input.is-invalid { border-color: var(--ans-a); box-shadow: 0 4px 0 var(--ans-a-lip); }
+
+.error {
+  display: none;
+  color: var(--ans-a-lip);
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+.error.is-shown { display: block; }
+
+/* ---------- 8. Question screen ---------------------------- */
+.progress { margin-bottom: 14px; text-align: center; }
+
+.progress__label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 3px 14px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.progress__track {
+  height: 15px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.progress__fill {
+  height: 100%;
+  width: 0;
+  background: repeating-linear-gradient(45deg, #ffc93c 0 8px, #ffb703 8px 16px);
+  border-radius: var(--radius-pill);
+  transition: width .35s cubic-bezier(.4,1.3,.5,1);
+}
+
+.question-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(20px, 5.2vw, 25px);
+  line-height: 1.25;
+  text-align: center;
+  margin: 0 0 18px;
+  color: var(--ink);
+  text-shadow: 0 2px 0 rgba(255,255,255,.7);
+}
+
+.answers { display: grid; gap: 11px; margin-bottom: 18px; }
+
+.answer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.35;
+  color: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  padding: 13px 15px;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .08s ease;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;            /* long-press shouldn't select the answer text */
+}
+.answer:active { transform: translateY(4px); }
+.answer:focus-visible { outline: 4px solid #1b6fd6; outline-offset: 3px; }
+
+.answer__glyph {
+  flex: 0 0 auto;
+  width: 30px; height: 30px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.24);
+  border: 2px solid rgba(255,255,255,.65);
+  border-radius: 9px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.answer--a { background: var(--ans-a); box-shadow: 0 6px 0 var(--ans-a-lip); }
+.answer--b { background: var(--ans-b); box-shadow: 0 6px 0 var(--ans-b-lip); }
+.answer--c { background: var(--ans-c); box-shadow: 0 6px 0 var(--ans-c-lip); }
+.answer--d { background: var(--ans-d); box-shadow: 0 6px 0 var(--ans-d-lip); }
+.answer--a:active { box-shadow: 0 1px 0 var(--ans-a-lip); }
+.answer--b:active { box-shadow: 0 1px 0 var(--ans-b-lip); }
+.answer--c:active { box-shadow: 0 1px 0 var(--ans-c-lip); }
+.answer--d:active { box-shadow: 0 1px 0 var(--ans-d-lip); }
+
+/* Selected state: lift, thicken, add a tick. */
+.answer.is-picked {
+  transform: translateY(3px) scale(1.015);
+  box-shadow: 0 3px 0 var(--ink), 0 0 0 4px #ffe08a;
+}
+.answer.is-picked .answer__glyph {
+  background: #fff;
+  color: var(--ink);
+  border-color: #fff;
+}
+.answer.is-picked .answer__glyph::after { content: '✓'; }
+.answer.is-picked .answer__glyph span { display: none; }
+
+.nav { display: flex; gap: 10px; }
+.nav .btn { flex: 1; }
+.nav .btn--ghost { flex: 0 0 96px; }
+
+/* ---------- 9. Finish screen ------------------------------ */
+.finish-mascots {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin-bottom: -10px;
+  position: relative;
+  z-index: 2;
+}
+.finish-mascots svg { width: 60px; height: 60px; animation: bob 3s ease-in-out infinite; }
+.finish-mascots svg:nth-child(2) { animation-delay: .25s; }
+.finish-mascots svg:nth-child(3) { animation-delay: .5s; }
+.finish-mascots svg:nth-child(4) { animation-delay: .75s; }
+
+.finish-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--brand-lip);
+  margin-bottom: 4px;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: #f0ebfa;
+  border-radius: var(--radius-pill);
+  padding: 5px 13px;
+  margin-top: 12px;
+}
+.tag--warn { background: #ffe6c7; color: #8a5a12; }
+
+/* ---------- 10. Loading ----------------------------------- */
+.spinner {
+  width: 42px; height: 42px;
+  margin: 4px auto 16px;
+  border: 5px solid #e5def2;
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- 11. Confetti ---------------------------------- */
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti i {
+  position: absolute;
+  top: -12vh;
+  width: 10px; height: 14px;
+  border-radius: 2px;
+  animation: fall linear forwards;
+}
+@keyframes fall {
+  to { transform: translateY(115vh) rotate(760deg); opacity: .85; }
+}
+
+/* ---------- 12. Footer ------------------------------------ */
+.credit {
+  position: fixed;
+  bottom: 10px; left: 0; right: 0;
+  z-index: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(44,35,64,.5);
+}
+
+/* ---------- 13. Larger screens ---------------------------- */
+@media (min-width: 620px) {
+  .mascots svg { width: 92px; height: 92px; }
+  .card { padding: 32px 30px; }
+  .answer { font-size: 17px; padding: 15px 17px; }
+}
+
+/* ---------- 14. Small phones -------------------------------
+   Budget Androids (360x640) and folded devices (320px) were
+   scrolling by ~50px on the question screen. Tighten spacing
+   rather than shrink tap targets — those stay above 44px.
+   ----------------------------------------------------------- */
+@media (max-height: 720px) {
+  .stage { padding: 12px 14px 40px; }
+  .mascots svg { width: 62px; height: 62px; }
+  .card { padding: 20px 18px; }
+  .progress { margin-bottom: 10px; }
+  .question-text { font-size: clamp(18px, 4.8vw, 22px); margin-bottom: 13px; }
+  .answers { gap: 9px; margin-bottom: 13px; }
+  .answer { padding: 11px 13px; }
+  .credit { display: none; }        /* reclaim the last 20px */
+}
+
+@media (max-width: 361px) {
+  .answer { font-size: 15px; gap: 10px; }
+  .answer__glyph { width: 27px; height: 27px; font-size: 14px; }
+  h1 { font-size: 28px; }
+}
+
+/* Landscape phones can't fit a quiz screen — let them scroll,
+   but start at the top instead of floating mid-page. */
+@media (max-height: 460px) and (orientation: landscape) {
+  .stage { padding: 10px 14px 20px; }
+  .screen.is-active { margin-block: 0; }
+  .mascots { display: none; }
+}
+
+/* Accessible hiding, for the live region and sprite sheet. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SPRITE SHEET — the four archetype mascots.
+     Original flat-vector drawings; edit the fills to restyle.
+     ============================================================ -->
+<svg class="visually-hidden" aria-hidden="true">
+  <defs>
+
+    <!-- ---------- RED PANDA ---------- -->
+    <symbol id="sprite-redpanda" viewBox="0 0 100 100">
+      <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+        <circle cx="24" cy="30" r="13" fill="#c2542c"/>
+        <circle cx="76" cy="30" r="13" fill="#c2542c"/>
+        <circle cx="24" cy="30" r="6.5" fill="#fbeadd" stroke-width="2.4"/>
+        <circle cx="76" cy="30" r="6.5" fill="#fbeadd" stroke-width="2.4"/>
+        <ellipse cx="50" cy="57" rx="33" ry="30" fill="#e2794a"/>
+        <ellipse cx="35" cy="47" rx="11" ry="8" fill="#fdf2e8" stroke="none"/>
+        <ellipse cx="65" cy="47" rx="11" ry="8" fill="#fdf2e8" stroke="none"/>
+        <ellipse cx="50" cy="68" rx="19" ry="13" fill="#fdf2e8" stroke="none"/>
+        <ellipse cx="30" cy="66" rx="6" ry="4" fill="#f2a184" stroke="none"/>
+        <ellipse cx="70" cy="66" rx="6" ry="4" fill="#f2a184" stroke="none"/>
+        <circle cx="37" cy="50" r="4.4" fill="#2c2340" stroke="none"/>
+        <circle cx="63" cy="50" r="4.4" fill="#2c2340" stroke="none"/>
+        <circle cx="38.6" cy="48.4" r="1.5" fill="#fff" stroke="none"/>
+        <circle cx="64.6" cy="48.4" r="1.5" fill="#fff" stroke="none"/>
+        <path d="M46.5 62.5h7l-3.5 4z" fill="#2c2340" stroke="none"/>
+        <path d="M50 67.5v3M50 70.5c-2.4 0-3.6-1.6-3.6-1.6M50 70.5c2.4 0 3.6-1.6 3.6-1.6"
+              fill="none" stroke-width="2.4"/>
+      </g>
+    </symbol>
+
+    <!-- ---------- RAT ---------- -->
+    <symbol id="sprite-rat" viewBox="0 0 100 100">
+      <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+        <circle cx="23" cy="28" r="15" fill="#bdb8cc"/>
+        <circle cx="77" cy="28" r="15" fill="#bdb8cc"/>
+        <circle cx="23" cy="28" r="8" fill="#f4b9c6" stroke-width="2.4"/>
+        <circle cx="77" cy="28" r="8" fill="#f4b9c6" stroke-width="2.4"/>
+        <ellipse cx="50" cy="58" rx="30" ry="28" fill="#cbc6d8"/>
+        <ellipse cx="50" cy="70" rx="17" ry="12" fill="#eae7f1" stroke="none"/>
+        <path d="M20 62h-10M20 68h-11M21 74h-9M80 62h10M80 68h11M79 74h9"
+              fill="none" stroke-width="2.2"/>
+        <circle cx="38" cy="52" r="4.4" fill="#2c2340" stroke="none"/>
+        <circle cx="62" cy="52" r="4.4" fill="#2c2340" stroke="none"/>
+        <circle cx="39.6" cy="50.4" r="1.5" fill="#fff" stroke="none"/>
+        <circle cx="63.6" cy="50.4" r="1.5" fill="#fff" stroke="none"/>
+        <ellipse cx="50" cy="65" rx="4.6" ry="3.6" fill="#ef7d9a"/>
+        <path d="M50 68.6v3.4" fill="none" stroke-width="2.4"/>
+        <rect x="46.4" y="72" width="7.2" height="6" rx="1.6" fill="#fffdf6" stroke-width="2.2"/>
+        <path d="M50 72v6" fill="none" stroke-width="1.8"/>
+      </g>
+    </symbol>
+
+    <!-- ---------- MONKEY ---------- -->
+    <symbol id="sprite-monkey" viewBox="0 0 100 100">
+      <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+        <circle cx="16" cy="52" r="12" fill="#a2704a"/>
+        <circle cx="84" cy="52" r="12" fill="#a2704a"/>
+        <circle cx="16" cy="52" r="6" fill="#e3ae80" stroke-width="2.4"/>
+        <circle cx="84" cy="52" r="6" fill="#e3ae80" stroke-width="2.4"/>
+        <circle cx="50" cy="52" r="31" fill="#a2704a"/>
+        <path d="M50 30c-13 0-22 9-22 21 0 14 10 26 22 26s22-12 22-26c0-12-9-21-22-21z"
+              fill="#f2cda2"/>
+        <circle cx="41" cy="49" r="4.4" fill="#2c2340" stroke="none"/>
+        <circle cx="59" cy="49" r="4.4" fill="#2c2340" stroke="none"/>
+        <circle cx="42.6" cy="47.4" r="1.5" fill="#fff" stroke="none"/>
+        <circle cx="60.6" cy="47.4" r="1.5" fill="#fff" stroke="none"/>
+        <circle cx="46.4" cy="61" r="1.7" fill="#2c2340" stroke="none"/>
+        <circle cx="53.6" cy="61" r="1.7" fill="#2c2340" stroke="none"/>
+        <path d="M41 67c3.6 4 14.4 4 18 0" fill="none" stroke-width="2.8"/>
+        <path d="M44 25c1.5-5 5-7 6-7M53 25c-1-4.5.5-7.5 2.5-8.5" fill="none" stroke-width="2.8"/>
+      </g>
+    </symbol>
+
+    <!-- ---------- HUMMING BIRD ---------- -->
+    <symbol id="sprite-hummingbird" viewBox="0 0 100 100">
+      <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M18 34c8-4 15-1 18 3M16 44c9-3 16 1 19 5" fill="none" stroke-width="2.2" opacity=".45"/>
+        <path d="M78 78c8 2 14 8 16 14" fill="none" stroke-width="2.2" opacity=".45"/>
+        <path d="M62 66c8 6 16 16 20 26-11-2-21-8-27-16z" fill="#1f8f9e"/>
+        <ellipse cx="52" cy="55" rx="21" ry="17" fill="#2fb8a6" transform="rotate(-24 52 55)"/>
+        <path d="M44 44c-10-6-22-8-30-4 6 8 16 14 26 15z" fill="#63d6c2"/>
+        <circle cx="62" cy="36" r="14" fill="#2fb8a6"/>
+        <path d="M56 46c4 3 9 3 13 0-1 6-5 9-6.5 9S57 52 56 46z" fill="#e8457b" stroke-width="2.6"/>
+        <path d="M73 29 96 19l-20 15z" fill="#3b3350"/>
+        <circle cx="65" cy="33" r="4.2" fill="#2c2340" stroke="none"/>
+        <circle cx="66.6" cy="31.4" r="1.5" fill="#fff" stroke="none"/>
+      </g>
+    </symbol>
+
+  </defs>
+</svg>
+
+
+<!-- ============================================================
+     BACKGROUND SCENERY
+     ============================================================ -->
+<div class="scenery" aria-hidden="true">
+  <svg class="cloud" style="top:9%;  width:118px; animation-duration:74s;" viewBox="0 0 120 54">
+    <path d="M18 54a18 18 0 0 1 0-36 22 22 0 0 1 42-6 20 20 0 0 1 42 6 18 18 0 0 1 0 36z"/>
+  </svg>
+  <svg class="cloud" style="top:24%; width:86px;  animation-duration:96s; animation-delay:-30s;" viewBox="0 0 120 54">
+    <path d="M18 54a18 18 0 0 1 0-36 22 22 0 0 1 42-6 20 20 0 0 1 42 6 18 18 0 0 1 0 36z"/>
+  </svg>
+  <svg class="cloud" style="top:47%; width:140px; animation-duration:120s; animation-delay:-70s; opacity:.6;" viewBox="0 0 120 54">
+    <path d="M18 54a18 18 0 0 1 0-36 22 22 0 0 1 42-6 20 20 0 0 1 42 6 18 18 0 0 1 0 36z"/>
+  </svg>
+
+  <svg class="hills" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice">
+    <path fill="#a5dd8f" d="M0 150c120-42 210 22 330 8s180-70 300-56 200 78 330 60 180-46 240-58v196H0z"/>
+    <path fill="#7fca6b" d="M0 208c140-46 240 20 380 6s200-62 330-46 210 66 330 48 100-24 160-32v116H0z"/>
+    <path fill="#63b154" d="M0 258c160-34 260 10 420 2s220-38 360-24 260 44 420 18v46H0z"/>
+  </svg>
+</div>
+
+
+<!-- ============================================================
+     SCREENS
+     ============================================================ -->
+<main class="stage">
+
+  <!-- ---------- 1. WELCOME ---------- -->
+  <section id="screen-welcome" class="screen is-active">
+    <div class="mascots">
+      <svg viewBox="0 0 100 100"><use href="#sprite-redpanda"></use></svg>
+      <svg viewBox="0 0 100 100"><use href="#sprite-rat"></use></svg>
+      <svg viewBox="0 0 100 100"><use href="#sprite-monkey"></use></svg>
+      <svg viewBox="0 0 100 100"><use href="#sprite-hummingbird"></use></svg>
+    </div>
+
+    <div class="card">
+      <span class="badge">Personality quiz</span>
+      <h1 id="welcome-title">Which One Are You?</h1>
+      <p id="welcome-subtitle"></p>
+      <button id="btn-start" class="btn" type="button">Start the quiz</button>
+    </div>
+  </section>
+
+  <!-- ---------- 2. NAME ---------- -->
+  <section id="screen-name" class="screen">
+    <div class="card">
+      <h2>First, who are you?</h2>
+      <p>So we can find your result when it's time to reveal.</p>
+
+      <form id="name-form" novalidate>
+        <div class="field">
+          <label for="input-player-name">
+            Display name
+            <span class="hint">— what we'll call out</span>
+          </label>
+          <input id="input-player-name" name="playerName" type="text"
+                 maxlength="40" autocomplete="nickname"
+                 placeholder="e.g. Ori" required>
+          <p class="error" id="error-player-name">Please enter a display name.</p>
+        </div>
+
+        <div class="field" id="field-real-name">
+          <label for="input-real-name">
+            Full name
+            <span class="hint">— so we know it's really you</span>
+          </label>
+          <input id="input-real-name" name="realName" type="text"
+                 maxlength="60" autocomplete="name"
+                 placeholder="e.g. Orian Akash" required>
+          <p class="error" id="error-real-name">Please enter your full name.</p>
+        </div>
+
+        <button id="btn-to-quiz" class="btn" type="submit">Let's go</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ---------- 3. QUESTION ---------- -->
+  <section id="screen-question" class="screen" aria-live="polite">
+    <div class="progress" id="progress">
+      <span class="progress__label" id="progress-label">Question 1 of 10</span>
+      <div class="progress__track">
+        <div class="progress__fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <h2 class="question-text" id="question-text">&nbsp;</h2>
+
+    <div class="answers" id="answers" role="radiogroup" aria-labelledby="question-text"></div>
+
+    <div class="nav">
+      <button id="btn-back" class="btn btn--ghost" type="button">Back</button>
+      <button id="btn-next" class="btn" type="button" disabled>Next</button>
+    </div>
+  </section>
+
+  <!-- ---------- 4. SENDING ---------- -->
+  <section id="screen-sending" class="screen">
+    <div class="card">
+      <div class="spinner"></div>
+      <h2>Saving your answers…</h2>
+      <p>One moment.</p>
+    </div>
+  </section>
+
+  <!-- ---------- 5. DONE ---------- -->
+  <section id="screen-done" class="screen">
+    <div class="finish-mascots">
+      <svg viewBox="0 0 100 100"><use href="#sprite-redpanda"></use></svg>
+      <svg viewBox="0 0 100 100"><use href="#sprite-rat"></use></svg>
+      <svg viewBox="0 0 100 100"><use href="#sprite-monkey"></use></svg>
+      <svg viewBox="0 0 100 100"><use href="#sprite-hummingbird"></use></svg>
+    </div>
+
+    <div class="card">
+      <p class="finish-name" id="done-name"></p>
+      <h2 id="done-heading">You're done!</h2>
+      <p id="done-body"></p>
+      <p class="tag" id="done-tag">Sit tight — no peeking</p>
+    </div>
+  </section>
+
+</main>
+
+<div class="confetti" id="confetti" aria-hidden="true"></div>
+<p class="credit">Made for the mixer</p>
+
+<script>
+/* ===== js/config.js ===== */
+/* ============================================================
+   CONFIG  —  edit this after you deploy the Apps Script.
+   ============================================================ */
+
+const CONFIG = {
+
+  /* Paste the Apps Script Web App URL here. It looks like:
+     https://script.google.com/macros/s/AKfycb.....X/exec
+
+     Leave it as an empty string to run in DEMO MODE: the quiz
+     works end to end but nothing is sent anywhere, and the
+     scores get logged to the browser console instead. Handy
+     for testing the questions before you wire up the Sheet. */
+  endpoint: '',
+
+  /* Ask for the player's real name as well as a display name.
+     Set to false if you only want one name field. */
+  askRealName: true,
+
+  /* Show a "Question 3 of 10" counter and progress bar. */
+  showProgress: true,
+
+  /* Let players go back and change an earlier answer. */
+  allowBack: true,
+
+  /* If the network drops mid-event, unsent submissions are kept
+     in the browser and retried. Set false to disable. */
+  retryFailedSubmissions: true
+};
+
+
+/* ===== js/quiz-data.js ===== */
+/* ============================================================
+   QUIZ CONTENT  —  this is the ONLY file you need to edit
+   to swap in your real questions.
+   ============================================================
+
+   HOW SCORING WORKS
+   -----------------
+   Every option carries a `scores` object. When a player picks
+   that option, those points are added to each archetype.
+   At the end, the archetype with the most points wins.
+
+   You can give an option points for more than one archetype.
+   The placeholder set below uses "2 points to the main
+   archetype, 1 point to a close cousin" — that spreads the
+   scores out and makes exact ties much less likely.
+
+   IMPORTANT — DON'T LEAK THE ANSWER
+   ---------------------------------
+   Option A is always the red button, B blue, C yellow, D green.
+   If Red Panda were always option A, players would spot the
+   pattern immediately. So the placeholder questions below
+   deliberately shuffle which archetype sits in which slot.
+   Keep doing that when you write the real ones.
+
+   ADDING / REMOVING QUESTIONS
+   ---------------------------
+   Just add or delete objects in the `questions` array. The
+   progress bar, page count and scoring all adapt on their own.
+   Options per question can vary too (2, 3, 4 or 5 all work).
+   ============================================================ */
+
+const QUIZ_DATA = {
+
+  /* ---- The four archetypes -------------------------------- */
+  /* `id` is used in the scores objects and as the Sheet column
+     order. Change `label` freely; changing `id` means updating
+     every scores object below.                                */
+  archetypes: [
+    {
+      id: 'redPanda',
+      label: 'Red Panda',
+      sprite: 'sprite-redpanda',
+      blurb: 'Warm, watchful and unhurried. Happiest in a small circle with good snacks.'
+    },
+    {
+      id: 'rats',
+      label: 'Rats',
+      sprite: 'sprite-rat',
+      blurb: 'Resourceful and quietly everywhere. Fixes the problem before anyone notices it existed.'
+    },
+    {
+      id: 'monkey',
+      label: 'Monkey',
+      sprite: 'sprite-monkey',
+      blurb: 'Loud, funny and impossible to ignore. The reason the room is laughing.'
+    },
+    {
+      id: 'hummingbird',
+      label: 'Humming Bird',
+      sprite: 'sprite-hummingbird',
+      blurb: 'Bright, curious and always mid-flight. Three ideas ahead of the conversation.'
+    }
+  ],
+
+  /* ---- Copy shown on the welcome + finish screens ---------- */
+  meta: {
+    title: 'Which One Are You?',
+    subtitle: 'Ten quick questions. No wrong answers. Your archetype gets revealed later tonight.',
+    startLabel: 'Start the quiz',
+    finishHeading: "You're done!",
+    finishBody: "You've completed the quiz! Your results have been recorded. Your archetype will be revealed during the program!"
+  },
+
+  /* ---- PLACEHOLDER QUESTIONS — swap these out -------------- */
+  questions: [
+    {
+      text: "It's a free Saturday morning. What actually happens?",
+      options: [
+        { text: 'Out the door early — there are three places to be',
+          scores: { hummingbird: 2, monkey: 1 } },
+        { text: 'Slow coffee, blanket, nowhere to be',
+          scores: { redPanda: 2, rats: 1 } },
+        { text: 'Finally fixing the thing that has been annoying me',
+          scores: { rats: 2, redPanda: 1 } },
+        { text: 'Texting everyone to see who wants to do something',
+          scores: { monkey: 2, hummingbird: 1 } }
+      ]
+    },
+    {
+      text: 'You walk into a room where you only know one person. You...',
+      options: [
+        { text: 'Find them, park next to them, stay a while',
+          scores: { redPanda: 2, rats: 1 } },
+        { text: 'Do a lap, say hi to everyone, land nowhere',
+          scores: { hummingbird: 2, monkey: 1 } },
+        { text: 'Start a bit with someone and let it escalate',
+          scores: { monkey: 2, hummingbird: 1 } },
+        { text: 'Clock the room first, then pick your moment',
+          scores: { rats: 2, redPanda: 1 } }
+      ]
+    },
+    {
+      text: 'Group project. Which job do you end up with?',
+      options: [
+        { text: 'Presenting it — obviously',
+          scores: { monkey: 2, hummingbird: 1 } },
+        { text: 'The unglamorous half nobody else wanted',
+          scores: { rats: 2, redPanda: 1 } },
+        { text: 'Keeping everyone calm and fed',
+          scores: { redPanda: 2, rats: 1 } },
+        { text: 'Coming up with eleven ideas, six of them good',
+          scores: { hummingbird: 2, monkey: 1 } }
+      ]
+    },
+    {
+      text: 'Long week. How do you recharge?',
+      options: [
+        { text: 'Somewhere new, even if it is just a different route home',
+          scores: { hummingbird: 2, rats: 1 } },
+        { text: 'People. Noise. A long dinner',
+          scores: { monkey: 2, redPanda: 1 } },
+        { text: 'A tidy room and an early night',
+          scores: { rats: 2, hummingbird: 1 } },
+        { text: 'One familiar film and zero obligations',
+          scores: { redPanda: 2, monkey: 1 } }
+      ]
+    },
+    {
+      text: 'There is a snack table. Be honest.',
+      options: [
+        { text: 'I have already found the good stuff and told three people',
+          scores: { rats: 2, monkey: 1 } },
+        { text: 'One plate, one spot, no rush',
+          scores: { redPanda: 2, hummingbird: 1 } },
+        { text: 'Grazing. Constantly. Never a full plate',
+          scores: { hummingbird: 2, rats: 1 } },
+        { text: "I'm holding court next to it rather than eating",
+          scores: { monkey: 2, redPanda: 1 } }
+      ]
+    },
+    {
+      text: 'Someone new joins your circle mid-conversation.',
+      options: [
+        { text: 'Immediately rope them into the joke',
+          scores: { monkey: 2, hummingbird: 1 } },
+        { text: 'Quietly shuffle over and make room',
+          scores: { redPanda: 2, rats: 1 } },
+        { text: 'Ask them four questions in ninety seconds',
+          scores: { hummingbird: 2, monkey: 1 } },
+        { text: 'Catch them up on what they missed',
+          scores: { rats: 2, redPanda: 1 } }
+      ]
+    },
+    {
+      text: 'A trip is being planned. Your role?',
+      options: [
+        { text: 'The spreadsheet, the bookings, the backup plan',
+          scores: { rats: 2, redPanda: 1 } },
+        { text: 'I suggested it and I will suggest four more',
+          scores: { hummingbird: 2, monkey: 1 } },
+        { text: 'I show up when told and bring the snacks',
+          scores: { redPanda: 2, rats: 1 } },
+        { text: 'Morale. I am morale',
+          scores: { monkey: 2, hummingbird: 1 } }
+      ]
+    },
+    {
+      text: 'Look around your room right now.',
+      options: [
+        { text: 'Cosy chaos, but I know where everything is',
+          scores: { redPanda: 2, monkey: 1 } },
+        { text: 'Genuinely a mess and I am rarely in it anyway',
+          scores: { hummingbird: 2, monkey: 1 } },
+        { text: 'Organised in a system only I understand',
+          scores: { rats: 2, hummingbird: 1 } },
+        { text: 'Whatever it looks like, people keep hanging out in it',
+          scores: { monkey: 2, redPanda: 1 } }
+      ]
+    },
+    {
+      text: 'Surprise free hour. No plans, no phone.',
+      options: [
+        { text: 'Nap. Immediately. Unapologetically',
+          scores: { redPanda: 2, rats: 1 } },
+        { text: 'Go find out what is happening somewhere else',
+          scores: { hummingbird: 2, monkey: 1 } },
+        { text: 'Knock out three small things off the list',
+          scores: { rats: 2, redPanda: 1 } },
+        { text: 'Call someone and turn it into a whole thing',
+          scores: { monkey: 2, hummingbird: 1 } }
+      ]
+    },
+    {
+      text: 'How would your friends describe you in one word?',
+      options: [
+        { text: 'Reliable',
+          scores: { rats: 2, redPanda: 1 } },
+        { text: 'Hilarious',
+          scores: { monkey: 2, hummingbird: 1 } },
+        { text: 'Calm',
+          scores: { redPanda: 2, rats: 1 } },
+        { text: 'Everywhere',
+          scores: { hummingbird: 2, monkey: 1 } }
+      ]
+    }
+  ]
+};
+
+/* Lets the test script require() this file under Node. */
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = QUIZ_DATA;
+}
+
+
+/* ===== js/scoring.js ===== */
+/* ============================================================
+   SCORING
+   ------------------------------------------------------------
+   One pure function. No DOM, no network — which is what makes
+   it testable (see test/scoring.test.js) and safe to reuse.
+   ============================================================ */
+
+/**
+ * Turn a list of picked option indexes into archetype scores.
+ *
+ * @param {number[]} answers  answers[i] = index of the option picked
+ *                            for questions[i]. null/undefined = skipped.
+ * @param {object}   data     the QUIZ_DATA object.
+ * @returns {{scores:object, hits:object, archetype:string,
+ *            archetypeLabel:string, tie:boolean, tiedWith:string[]}}
+ */
+function scoreQuiz(answers, data) {
+  const ids = data.archetypes.map(a => a.id);
+
+  const scores = {};
+  const hits = {};              // how many questions each archetype scored on
+  ids.forEach(id => { scores[id] = 0; hits[id] = 0; });
+
+  answers.forEach((optIndex, qIndex) => {
+    const question = data.questions[qIndex];
+    if (!question) return;
+    if (optIndex === null || optIndex === undefined) return;
+
+    const option = question.options[optIndex];
+    if (!option || !option.scores) return;
+
+    Object.keys(option.scores).forEach(id => {
+      if (!(id in scores)) return;          // ignore unknown archetype ids
+      const points = Number(option.scores[id]) || 0;
+      scores[id] += points;
+      if (points > 0) hits[id] += 1;
+    });
+  });
+
+  /* ---- pick a winner ------------------------------------------------
+     1. highest total
+     2. tie-break: whoever scored across the most questions (broad fit
+        beats one lucky spike)
+     3. still tied: first in the archetypes array, and we flag it so the
+        host can pick by hand at the reveal.
+     ------------------------------------------------------------------ */
+  const top = Math.max(...ids.map(id => scores[id]));
+  let candidates = ids.filter(id => scores[id] === top);
+  const trueTie = candidates.length > 1;
+
+  if (candidates.length > 1) {
+    const mostHits = Math.max(...candidates.map(id => hits[id]));
+    candidates = candidates.filter(id => hits[id] === mostHits);
+  }
+
+  const winner = candidates[0];
+  const winnerMeta = data.archetypes.find(a => a.id === winner);
+
+  return {
+    scores,
+    hits,
+    archetype: winner,
+    archetypeLabel: winnerMeta ? winnerMeta.label : winner,
+    tie: trueTie,
+    tiedWith: trueTie ? ids.filter(id => scores[id] === top) : []
+  };
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { scoreQuiz };
+}
+
+
+/* ===== js/app.js ===== */
+/* ============================================================
+   APP — screen flow, question rendering, submission.
+   Depends on: config.js, quiz-data.js, scoring.js
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* ---------- element lookups ------------------------------ */
+  const $ = id => document.getElementById(id);
+
+  const screens = {
+    welcome:  $('screen-welcome'),
+    name:     $('screen-name'),
+    question: $('screen-question'),
+    sending:  $('screen-sending'),
+    done:     $('screen-done')
+  };
+
+  const els = {
+    welcomeTitle:  $('welcome-title'),
+    welcomeSub:    $('welcome-subtitle'),
+    btnStart:      $('btn-start'),
+    nameForm:      $('name-form'),
+    inputPlayer:   $('input-player-name'),
+    inputReal:     $('input-real-name'),
+    fieldReal:     $('field-real-name'),
+    errPlayer:     $('error-player-name'),
+    errReal:       $('error-real-name'),
+    progress:      $('progress'),
+    progressLabel: $('progress-label'),
+    progressFill:  $('progress-fill'),
+    questionText:  $('question-text'),
+    answers:       $('answers'),
+    btnBack:       $('btn-back'),
+    btnNext:       $('btn-next'),
+    doneName:      $('done-name'),
+    doneHeading:   $('done-heading'),
+    doneBody:      $('done-body'),
+    doneTag:       $('done-tag'),
+    confetti:      $('confetti')
+  };
+
+  /* ---------- state ---------------------------------------- */
+  const state = {
+    playerId:   makeId(),
+    playerName: '',
+    realName:   '',
+    answers:    new Array(QUIZ_DATA.questions.length).fill(null),
+    index:      0,
+    submitting: false
+  };
+
+  const STORAGE_KEY  = 'archetypeQuiz.pending';   // localStorage: failed sends
+  const PROGRESS_KEY = 'archetypeQuiz.progress';  // sessionStorage: this attempt
+  const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const SLOT_CLASS = ['answer--a', 'answer--b', 'answer--c', 'answer--d',
+                      'answer--a', 'answer--b'];
+
+  /* ============================================================
+     Helpers
+     ============================================================ */
+
+  function makeId() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'p-' + Date.now().toString(36) + '-' +
+           Math.random().toString(36).slice(2, 10);
+  }
+
+  function show(name) {
+    Object.values(screens).forEach(s => s.classList.remove('is-active'));
+    screens[name].classList.add('is-active');
+    window.scrollTo(0, 0);
+  }
+
+  /* localStorage can throw (private mode, blocked cookies, embedded
+     previews). Every access goes through these two, and the quiz
+     works perfectly well if both silently do nothing. */
+  function storeGet(key) {
+    try { return window.localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function storeSet(key, value) {
+    try { window.localStorage.setItem(key, value); return true; }
+    catch (e) { return false; }
+  }
+
+  /* Progress uses sessionStorage on purpose, not localStorage. A phone
+     gets passed around at a mixer — session scope means a reload resumes
+     your own quiz, but a fresh tab starts clean for the next person. */
+  function saveProgress() {
+    try {
+      window.sessionStorage.setItem(PROGRESS_KEY, JSON.stringify({
+        playerId:   state.playerId,
+        playerName: state.playerName,
+        realName:   state.realName,
+        answers:    state.answers,
+        index:      state.index
+      }));
+    } catch (e) { /* private mode — progress just won't survive a reload */ }
+  }
+
+  function clearProgress() {
+    try { window.sessionStorage.removeItem(PROGRESS_KEY); } catch (e) {}
+  }
+
+  function restoreProgress() {
+    let saved;
+    try { saved = JSON.parse(window.sessionStorage.getItem(PROGRESS_KEY) || 'null'); }
+    catch (e) { return false; }
+
+    if (!saved || !saved.playerName) return false;
+    // Question count changed since they started — the saved answers no
+    // longer line up with the questions, so don't pretend they do.
+    if (!Array.isArray(saved.answers) ||
+        saved.answers.length !== QUIZ_DATA.questions.length) {
+      clearProgress();
+      return false;
+    }
+
+    state.playerId   = saved.playerId || state.playerId;
+    state.playerName = saved.playerName;
+    state.realName   = saved.realName || '';
+    state.answers    = saved.answers;
+    state.index      = Math.min(saved.index || 0, QUIZ_DATA.questions.length - 1);
+    return true;
+  }
+
+  /* ============================================================
+     Welcome
+     ============================================================ */
+
+  els.welcomeTitle.textContent = QUIZ_DATA.meta.title;
+  els.welcomeSub.textContent   = QUIZ_DATA.meta.subtitle;
+  els.btnStart.textContent     = QUIZ_DATA.meta.startLabel;
+
+  if (!CONFIG.askRealName) els.fieldReal.hidden = true;
+  if (!CONFIG.showProgress) els.progress.style.display = 'none';
+
+  els.btnStart.addEventListener('click', () => {
+    show('name');
+    setTimeout(() => els.inputPlayer.focus(), 260);
+  });
+
+  /* ============================================================
+     Name form
+     ============================================================ */
+
+  function markInvalid(input, errorEl, isBad) {
+    input.classList.toggle('is-invalid', isBad);
+    errorEl.classList.toggle('is-shown', isBad);
+  }
+
+  els.nameForm.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const player = els.inputPlayer.value.trim();
+    const real   = CONFIG.askRealName ? els.inputReal.value.trim() : '';
+
+    const badPlayer = player.length === 0;
+    const badReal   = CONFIG.askRealName && real.length === 0;
+
+    markInvalid(els.inputPlayer, els.errPlayer, badPlayer);
+    if (CONFIG.askRealName) markInvalid(els.inputReal, els.errReal, badReal);
+
+    if (badPlayer) { els.inputPlayer.focus(); return; }
+    if (badReal)   { els.inputReal.focus();   return; }
+
+    state.playerName = player;
+    state.realName   = real;
+
+    state.index = 0;
+    saveProgress();
+    renderQuestion();
+    show('question');
+  });
+
+  [els.inputPlayer, els.inputReal].forEach(input => {
+    input.addEventListener('input', () => {
+      input.classList.remove('is-invalid');
+      const err = input === els.inputPlayer ? els.errPlayer : els.errReal;
+      err.classList.remove('is-shown');
+    });
+  });
+
+  /* ============================================================
+     Questions
+     ============================================================ */
+
+  function renderQuestion() {
+    const total = QUIZ_DATA.questions.length;
+    const q = QUIZ_DATA.questions[state.index];
+
+    els.progressLabel.textContent = 'Question ' + (state.index + 1) + ' of ' + total;
+    // (index + 1) so question 1 already shows a sliver of progress —
+    // an empty bar on the first screen reads as broken.
+    els.progressFill.style.width = (((state.index + 1) / total) * 100) + '%';
+
+    els.questionText.textContent = q.text;
+
+    els.answers.innerHTML = '';
+    q.options.forEach((option, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'answer ' + (SLOT_CLASS[i] || 'answer--a');
+      btn.setAttribute('role', 'radio');
+      btn.setAttribute('aria-checked', state.answers[state.index] === i ? 'true' : 'false');
+      if (state.answers[state.index] === i) btn.classList.add('is-picked');
+
+      const glyph = document.createElement('span');
+      glyph.className = 'answer__glyph';
+      const letter = document.createElement('span');
+      letter.textContent = LETTERS[i] || (i + 1);
+      glyph.appendChild(letter);
+
+      const label = document.createElement('span');
+      label.className = 'answer__text';
+      label.textContent = option.text;
+
+      btn.append(glyph, label);
+      btn.addEventListener('click', () => pick(i));
+      els.answers.appendChild(btn);
+    });
+
+    // display:none, not visibility:hidden — otherwise the hidden Back
+    // button keeps its slot and shoves Next off-centre on question 1.
+    const showBack = CONFIG.allowBack && state.index > 0;
+    els.btnBack.style.display = showBack ? '' : 'none';
+    els.btnNext.disabled = state.answers[state.index] === null;
+    els.btnNext.textContent =
+      state.index === total - 1 ? 'Finish' : 'Next';
+  }
+
+  function pick(optionIndex) {
+    state.answers[state.index] = optionIndex;
+
+    els.answers.querySelectorAll('.answer').forEach((btn, i) => {
+      const on = i === optionIndex;
+      btn.classList.toggle('is-picked', on);
+      btn.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+
+    els.btnNext.disabled = false;
+    saveProgress();
+  }
+
+  els.btnNext.addEventListener('click', () => {
+    if (state.answers[state.index] === null) return;
+
+    if (state.index < QUIZ_DATA.questions.length - 1) {
+      state.index += 1;
+      saveProgress();
+      renderQuestion();
+      screens.question.classList.remove('is-active');
+      void screens.question.offsetWidth;      // restart the pop animation
+      screens.question.classList.add('is-active');
+    } else {
+      finish();
+    }
+  });
+
+  els.btnBack.addEventListener('click', () => {
+    if (state.index === 0) return;
+    state.index -= 1;
+    saveProgress();
+    renderQuestion();
+  });
+
+  /* Keyboard: 1-4 or A-D to answer, Enter to advance. */
+  document.addEventListener('keydown', e => {
+    if (!screens.question.classList.contains('is-active')) return;
+    const q = QUIZ_DATA.questions[state.index];
+
+    const numeric = parseInt(e.key, 10);
+    if (numeric >= 1 && numeric <= q.options.length) { pick(numeric - 1); return; }
+
+    const alphaIndex = LETTERS.indexOf(e.key.toUpperCase());
+    if (alphaIndex > -1 && alphaIndex < q.options.length) { pick(alphaIndex); return; }
+
+    if (e.key === 'Enter' && !els.btnNext.disabled) els.btnNext.click();
+  });
+
+  /* ============================================================
+     Finish + submit
+     ============================================================ */
+
+  function buildPayload() {
+    const result = scoreQuiz(state.answers, QUIZ_DATA);
+
+    return {
+      playerId:       state.playerId,
+      playerName:     state.playerName,
+      realName:       state.realName,
+      archetype:      result.archetype,
+      archetypeLabel: result.archetypeLabel,
+      scores:         result.scores,
+      tie:            result.tie,
+      tiedWith:       result.tiedWith,
+      answers:        state.answers,
+      answerLabels:   state.answers.map((optIndex, qIndex) => {
+        const q = QUIZ_DATA.questions[qIndex];
+        if (!q || optIndex === null) return '';
+        return (q.options[optIndex] || {}).text || '';
+      }),
+      questionCount:  QUIZ_DATA.questions.length,
+      clientTime:     new Date().toISOString()
+    };
+  }
+
+  async function finish() {
+    if (state.submitting) return;
+    state.submitting = true;
+
+    els.progressFill.style.width = '100%';
+    const payload = buildPayload();
+
+    show('sending');
+
+    const outcome = await submit(payload);
+
+    els.doneName.textContent    = 'Thanks, ' + state.playerName + '!';
+    els.doneHeading.textContent = QUIZ_DATA.meta.finishHeading;
+    els.doneBody.textContent    = QUIZ_DATA.meta.finishBody;
+
+    if (outcome === 'queued') {
+      els.doneTag.textContent = 'Saved on this device — it will send when you\'re back online';
+      els.doneTag.classList.add('tag--warn');
+    } else if (outcome === 'demo') {
+      els.doneTag.textContent = 'Demo mode — nothing was sent (see the console)';
+      els.doneTag.classList.add('tag--warn');
+    } else {
+      els.doneTag.textContent = 'Sit tight — no peeking';
+    }
+
+    clearProgress();
+    show('done');
+    confetti();
+    state.submitting = false;
+  }
+
+  /**
+   * Returns 'sent' | 'queued' | 'demo'.
+   *
+   * Apps Script and CORS: sending as text/plain keeps this a "simple"
+   * request, so the browser skips the preflight OPTIONS that Apps
+   * Script cannot answer. If the response still can't be read, we
+   * resend with mode:'no-cors' — the script receives it fine, we just
+   * can't see the reply, which is an acceptable trade at a mixer.
+   */
+  async function submit(payload) {
+    if (!CONFIG.endpoint) {
+      console.log('[DEMO MODE] nothing sent. Payload was:', payload);
+      console.table(payload.scores);
+      return 'demo';
+    }
+
+    const body = JSON.stringify(payload);
+
+    try {
+      const res = await fetch(CONFIG.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: body,
+        redirect: 'follow'
+      });
+      if (res.ok) return 'sent';
+      throw new Error('HTTP ' + res.status);
+    } catch (err) {
+      console.warn('Readable POST failed, retrying fire-and-forget:', err);
+    }
+
+    try {
+      await fetch(CONFIG.endpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: body
+      });
+      return 'sent';
+    } catch (err) {
+      console.error('Submission failed, queueing locally:', err);
+    }
+
+    if (CONFIG.retryFailedSubmissions) queue(payload);
+    return 'queued';
+  }
+
+  function queue(payload) {
+    let pending = [];
+    try { pending = JSON.parse(storeGet(STORAGE_KEY) || '[]'); } catch (e) { pending = []; }
+    pending.push(payload);
+    storeSet(STORAGE_KEY, JSON.stringify(pending));
+  }
+
+  /* On load, try to flush anything stranded by an earlier drop-out. */
+  async function flushQueue() {
+    if (!CONFIG.endpoint || !CONFIG.retryFailedSubmissions) return;
+
+    let pending = [];
+    try { pending = JSON.parse(storeGet(STORAGE_KEY) || '[]'); } catch (e) { return; }
+    if (!pending.length) return;
+
+    const stillPending = [];
+    for (const payload of pending) {
+      try {
+        await fetch(CONFIG.endpoint, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        stillPending.push(payload);
+      }
+    }
+    storeSet(STORAGE_KEY, JSON.stringify(stillPending));
+    if (pending.length !== stillPending.length) {
+      console.log('Flushed ' + (pending.length - stillPending.length) + ' queued submission(s).');
+    }
+  }
+
+  /* ============================================================
+     Confetti
+     ============================================================ */
+
+  function confetti() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const colours = ['#ef4d5c', '#2f95dd', '#f4a72c', '#3fb56d', '#ff5f7e', '#8b5cf6'];
+    const frag = document.createDocumentFragment();
+
+    for (let i = 0; i < 64; i++) {
+      const bit = document.createElement('i');
+      bit.style.left            = Math.random() * 100 + 'vw';
+      bit.style.background      = colours[i % colours.length];
+      bit.style.animationDelay  = (Math.random() * 1.4) + 's';
+      bit.style.animationDuration = (2.6 + Math.random() * 2.2) + 's';
+      bit.style.transform       = 'rotate(' + (Math.random() * 360) + 'deg)';
+      if (i % 3 === 0) bit.style.borderRadius = '50%';
+      frag.appendChild(bit);
+    }
+    els.confetti.appendChild(frag);
+    setTimeout(() => { els.confetti.innerHTML = ''; }, 7000);
+  }
+
+  /* ============================================================
+     Go
+     ============================================================ */
+
+  flushQueue();
+
+  /* A phone browser can drop a backgrounded tab at any moment. If this
+     one comes back mid-quiz, put them where they left off rather than
+     making them start over. */
+  if (restoreProgress()) {
+    renderQuestion();
+    show('question');
+  }
+
+  /* Belt and braces: warn before a refresh, since restore only covers
+     the same tab. */
+  window.addEventListener('beforeunload', e => {
+    const started = state.answers.some(a => a !== null);
+    const finished = screens.done.classList.contains('is-active');
+    if (started && !finished) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  /* Save on the way out too — pagehide is the one event iOS reliably
+     fires when a tab is backgrounded or discarded. */
+  window.addEventListener('pagehide', () => {
+    const started = state.answers.some(a => a !== null);
+    if (started && !screens.done.classList.contains('is-active')) saveProgress();
+  });
+
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+/* ============================================================
+   ARCHETYPE QUIZ — styles
+   Chunky outlines, flat colour, big press-down buttons.
+   Mobile first: almost everyone will do this on a phone.
+   ============================================================ */
+
+/* ---------- 1. Tokens ------------------------------------- */
+:root {
+  --ink:        #2c2340;   /* every outline in the whole site   */
+  --ink-soft:   #5b4f78;
+  --paper:      #fffdf6;
+
+  --sky-top:    #a8e5f7;
+  --sky-bottom: #dff5fb;
+  --hill-back:  #a5dd8f;
+  --hill-mid:   #7fca6b;
+  --hill-front: #63b154;
+  --cloud:      #fffdf6;
+
+  --brand:      #ff5f7e;   /* primary button */
+  --brand-lip:  #d43a5c;
+
+  /* Answer colours are fixed by POSITION, never by archetype,
+     so the palette can never leak the scoring. */
+  --ans-a:      #ef4d5c;  --ans-a-lip: #c22f3d;
+  --ans-b:      #2f95dd;  --ans-b-lip: #1c6ca6;
+  --ans-c:      #f4a72c;  --ans-c-lip: #c67e13;
+  --ans-d:      #3fb56d;  --ans-d-lip: #2a8850;
+
+  --radius:     22px;
+  --radius-pill: 999px;
+
+  --font-display: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body:    'Nunito', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ---------- 2. Base --------------------------------------- */
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 55%);
+  background-attachment: fixed;
+  min-height: 100vh;      /* fallback for iOS < 15.4 */
+  min-height: 100dvh;     /* tracks the shrinking address bar */
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;   /* no rubber-band revealing the void */
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;   /* stop iOS inflating text in landscape */
+}
+
+/* The scenery sits behind everything and never scrolls away. */
+.scenery {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.scenery .hills {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  height: 26vh;
+  min-height: 170px;
+}
+
+.cloud {
+  position: absolute;
+  fill: var(--cloud);
+  opacity: .95;
+  animation: drift 60s linear infinite;
+}
+@keyframes drift {
+  from { transform: translateX(-12vw); }
+  to   { transform: translateX(112vw); }
+}
+
+/* ---------- 3. Layout ------------------------------------- */
+.stage {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* NOT justify-content:center — when content is taller than the viewport
+     (landscape phones), centring a flex child clips its top beyond reach
+     of the scrollbar. Auto margins centre without ever clipping. */
+  justify-content: flex-start;
+  padding: 20px 16px 54px;
+}
+
+.screen { display: none; width: 100%; max-width: 460px; }
+.screen.is-active {
+  display: block;
+  margin-block: auto;
+  animation: pop .32s cubic-bezier(.34,1.4,.5,1) both;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(14px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Respect people who get motion sick. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ---------- 4. Cards & type ------------------------------- */
+.card {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 0 7px 0 var(--ink);
+  padding: 26px 22px;
+  text-align: center;
+}
+
+h1, h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0 0 10px;
+  letter-spacing: -.01em;
+}
+h1 { font-size: clamp(30px, 8vw, 42px); }
+h2 { font-size: clamp(21px, 5.4vw, 27px); }
+
+p  { margin: 0 0 14px; line-height: 1.5; font-size: 16px; color: var(--ink-soft); }
+p:last-child { margin-bottom: 0; }
+
+/* ---------- 5. Buttons ------------------------------------ */
+.btn {
+  display: block;
+  width: 100%;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  color: #fff;
+  background: var(--brand);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 6px 0 var(--brand-lip);
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
+  -webkit-appearance: none;
+  touch-action: manipulation;   /* kills the 300ms tap delay + double-tap zoom */
+}
+/* Guarded: on touch screens an unguarded :hover sticks after a tap. */
+@media (hover: hover) {
+  .btn:hover:not(:disabled) { filter: brightness(1.05); }
+}
+.btn:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--brand-lip);
+}
+.btn:focus-visible { outline: 4px solid #1b6fd6; outline-offset: 3px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: 0 6px 0 var(--brand-lip); }
+
+.btn--ghost {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 6px 0 #cfc6de;
+  font-size: 16px;
+  padding: 11px 18px;
+}
+.btn--ghost:active:not(:disabled) { box-shadow: 0 1px 0 #cfc6de; }
+
+/* ---------- 6. Welcome screen ----------------------------- */
+.mascots {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 4px;
+  margin-bottom: -14px;
+  position: relative;
+  z-index: 2;
+}
+.mascots svg {
+  width: 74px; height: 74px;
+  filter: drop-shadow(0 3px 0 rgba(44,35,64,.16));
+  animation: bob 3.4s ease-in-out infinite;
+}
+.mascots svg:nth-child(2) { animation-delay: .28s; }
+.mascots svg:nth-child(3) { animation-delay: .56s; }
+.mascots svg:nth-child(4) { animation-delay: .84s; }
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0)    rotate(-1.5deg); }
+  50%      { transform: translateY(-9px) rotate(1.5deg); }
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: #ffe08a;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 5px 15px;
+  margin-bottom: 14px;
+  transform: rotate(-2deg);
+}
+
+/* ---------- 7. Name form ---------------------------------- */
+.field { text-align: left; margin-bottom: 16px; }
+
+.field label {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.field .hint { font-weight: 400; font-size: 13px; color: var(--ink-soft); }
+
+.field input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 17px;               /* 16px+ stops iOS auto-zoom on focus */
+  color: var(--ink);
+  background: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 0 4px 0 #cfc6de;
+  padding: 12px 14px;
+  touch-action: manipulation;
+}
+.field input:focus { outline: 4px solid #1b6fd6; outline-offset: 2px; }
+.field input.is-invalid { border-color: var(--ans-a); box-shadow: 0 4px 0 var(--ans-a-lip); }
+
+.error {
+  display: none;
+  color: var(--ans-a-lip);
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+.error.is-shown { display: block; }
+
+/* ---------- 8. Question screen ---------------------------- */
+.progress { margin-bottom: 14px; text-align: center; }
+
+.progress__label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 3px 14px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.progress__track {
+  height: 15px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.progress__fill {
+  height: 100%;
+  width: 0;
+  background: repeating-linear-gradient(45deg, #ffc93c 0 8px, #ffb703 8px 16px);
+  border-radius: var(--radius-pill);
+  transition: width .35s cubic-bezier(.4,1.3,.5,1);
+}
+
+.question-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(20px, 5.2vw, 25px);
+  line-height: 1.25;
+  text-align: center;
+  margin: 0 0 18px;
+  color: var(--ink);
+  text-shadow: 0 2px 0 rgba(255,255,255,.7);
+}
+
+.answers { display: grid; gap: 11px; margin-bottom: 18px; }
+
+.answer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.35;
+  color: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  padding: 13px 15px;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .08s ease;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;            /* long-press shouldn't select the answer text */
+}
+.answer:active { transform: translateY(4px); }
+.answer:focus-visible { outline: 4px solid #1b6fd6; outline-offset: 3px; }
+
+.answer__glyph {
+  flex: 0 0 auto;
+  width: 30px; height: 30px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.24);
+  border: 2px solid rgba(255,255,255,.65);
+  border-radius: 9px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.answer--a { background: var(--ans-a); box-shadow: 0 6px 0 var(--ans-a-lip); }
+.answer--b { background: var(--ans-b); box-shadow: 0 6px 0 var(--ans-b-lip); }
+.answer--c { background: var(--ans-c); box-shadow: 0 6px 0 var(--ans-c-lip); }
+.answer--d { background: var(--ans-d); box-shadow: 0 6px 0 var(--ans-d-lip); }
+.answer--a:active { box-shadow: 0 1px 0 var(--ans-a-lip); }
+.answer--b:active { box-shadow: 0 1px 0 var(--ans-b-lip); }
+.answer--c:active { box-shadow: 0 1px 0 var(--ans-c-lip); }
+.answer--d:active { box-shadow: 0 1px 0 var(--ans-d-lip); }
+
+/* Selected state: lift, thicken, add a tick. */
+.answer.is-picked {
+  transform: translateY(3px) scale(1.015);
+  box-shadow: 0 3px 0 var(--ink), 0 0 0 4px #ffe08a;
+}
+.answer.is-picked .answer__glyph {
+  background: #fff;
+  color: var(--ink);
+  border-color: #fff;
+}
+.answer.is-picked .answer__glyph::after { content: '✓'; }
+.answer.is-picked .answer__glyph span { display: none; }
+
+.nav { display: flex; gap: 10px; }
+.nav .btn { flex: 1; }
+.nav .btn--ghost { flex: 0 0 96px; }
+
+/* ---------- 9. Finish screen ------------------------------ */
+.finish-mascots {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin-bottom: -10px;
+  position: relative;
+  z-index: 2;
+}
+.finish-mascots svg { width: 60px; height: 60px; animation: bob 3s ease-in-out infinite; }
+.finish-mascots svg:nth-child(2) { animation-delay: .25s; }
+.finish-mascots svg:nth-child(3) { animation-delay: .5s; }
+.finish-mascots svg:nth-child(4) { animation-delay: .75s; }
+
+.finish-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--brand-lip);
+  margin-bottom: 4px;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: #f0ebfa;
+  border-radius: var(--radius-pill);
+  padding: 5px 13px;
+  margin-top: 12px;
+}
+.tag--warn { background: #ffe6c7; color: #8a5a12; }
+
+/* ---------- 10. Loading ----------------------------------- */
+.spinner {
+  width: 42px; height: 42px;
+  margin: 4px auto 16px;
+  border: 5px solid #e5def2;
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- 11. Confetti ---------------------------------- */
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti i {
+  position: absolute;
+  top: -12vh;
+  width: 10px; height: 14px;
+  border-radius: 2px;
+  animation: fall linear forwards;
+}
+@keyframes fall {
+  to { transform: translateY(115vh) rotate(760deg); opacity: .85; }
+}
+
+/* ---------- 12. Footer ------------------------------------ */
+.credit {
+  position: fixed;
+  bottom: 10px; left: 0; right: 0;
+  z-index: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(44,35,64,.5);
+}
+
+/* ---------- 13. Larger screens ---------------------------- */
+@media (min-width: 620px) {
+  .mascots svg { width: 92px; height: 92px; }
+  .card { padding: 32px 30px; }
+  .answer { font-size: 17px; padding: 15px 17px; }
+}
+
+/* ---------- 14. Small phones -------------------------------
+   Budget Androids (360x640) and folded devices (320px) were
+   scrolling by ~50px on the question screen. Tighten spacing
+   rather than shrink tap targets — those stay above 44px.
+   ----------------------------------------------------------- */
+@media (max-height: 720px) {
+  .stage { padding: 12px 14px 40px; }
+  .mascots svg { width: 62px; height: 62px; }
+  .card { padding: 20px 18px; }
+  .progress { margin-bottom: 10px; }
+  .question-text { font-size: clamp(18px, 4.8vw, 22px); margin-bottom: 13px; }
+  .answers { gap: 9px; margin-bottom: 13px; }
+  .answer { padding: 11px 13px; }
+  .credit { display: none; }        /* reclaim the last 20px */
+}
+
+@media (max-width: 361px) {
+  .answer { font-size: 15px; gap: 10px; }
+  .answer__glyph { width: 27px; height: 27px; font-size: 14px; }
+  h1 { font-size: 28px; }
+}
+
+/* Landscape phones can't fit a quiz screen — let them scroll,
+   but start at the top instead of floating mid-page. */
+@media (max-height: 460px) and (orientation: landscape) {
+  .stage { padding: 10px 14px 20px; }
+  .screen.is-active { margin-block: 0; }
+  .mascots { display: none; }
+}
+
+/* Accessible hiding, for the live region and sprite sheet. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

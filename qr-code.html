@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Maker — Archetype Quiz</title>
+<style>
+/* Utility tool, not a showpiece: same palette as the quiz, plainer treatment. */
+:root {
+  --ink: #2c2340;
+  --ink-soft: #5b4f78;
+  --paper: #fffdf6;
+  --page: #eef1f7;
+  --line: #d7d2e4;
+  --brand: #ff5f7e;
+  --brand-lip: #d43a5c;
+  --ok: #2a8850;
+  --warn: #b4690e;
+  --font-display: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 28px 20px 60px;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--page);
+  line-height: 1.5;
+}
+
+.wrap { max-width: 940px; margin: 0 auto; }
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+.lede { color: var(--ink-soft); margin: 0 0 26px; max-width: 62ch; }
+
+.cols { display: grid; gap: 22px; grid-template-columns: 1fr; }
+@media (min-width: 820px) { .cols { grid-template-columns: 340px 1fr; align-items: start; } }
+
+.panel {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 0 4px 0 var(--ink);
+  padding: 20px;
+}
+
+.field { margin-bottom: 16px; }
+.field:last-child { margin-bottom: 0; }
+
+label {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+.sub { display: block; font-family: var(--font-body); font-weight: 400; font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+
+input[type=text], input[type=url], select {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 9px 11px;
+}
+input:focus, select:focus { outline: 3px solid #1b6fd6; outline-offset: 1px; }
+
+.btn {
+  display: block;
+  width: 100%;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  background: var(--brand);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 0 4px 0 var(--brand-lip);
+  padding: 11px 16px;
+  cursor: pointer;
+  margin-bottom: 9px;
+}
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--brand-lip); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn--ghost { background: #fff; color: var(--ink); box-shadow: 0 4px 0 var(--line); }
+.btn--ghost:active { box-shadow: 0 1px 0 var(--line); }
+
+.status {
+  font-size: 13.5px;
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-top: 14px;
+}
+.status--ok   { background: #e4f5ea; color: var(--ok); }
+.status--warn { background: #fdf0dc; color: var(--warn); }
+.status--err  { background: #fde5e8; color: var(--brand-lip); }
+
+.meta {
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 12px;
+}
+.meta dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; }
+.meta dt { font-weight: 700; }
+.meta dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+/* ---- The printable sign ---- */
+.preview-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.preview-head h2 { font-family: var(--font-display); font-size: 17px; margin: 0; }
+.preview-head span { font-size: 13px; color: var(--ink-soft); }
+
+.sign {
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  padding: 32px 28px 26px;
+  text-align: center;
+  aspect-ratio: 1 / 1.414;      /* A4 proportions, so print matches preview */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.sign__mascots { display: flex; gap: 2px; justify-content: center; }
+.sign__mascots svg { width: 46px; height: 46px; }
+
+.sign__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(24px, 4.2vw, 38px);
+  line-height: 1.1;
+  margin: 0;
+  text-wrap: balance;
+}
+.sign__sub { margin: 0; color: var(--ink-soft); font-size: clamp(14px, 1.8vw, 17px); max-width: 34ch; }
+
+.sign__qr {
+  width: min(52%, 300px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+.sign__qr canvas { width: 100%; height: 100%; image-rendering: pixelated; }
+.sign__qr.is-empty {
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  padding: 20px;
+}
+
+.sign__cta {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(15px, 2.2vw, 20px);
+  background: #ffe08a;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 6px 20px;
+}
+.sign__url {
+  font-size: 12px;
+  color: var(--ink-soft);
+  word-break: break-all;
+  max-width: 44ch;
+}
+
+/* ---- Print: the sign alone, edge to edge ---- */
+@media print {
+  @page { size: A4 portrait; margin: 12mm; }
+  body { background: #fff; padding: 0; }
+  .no-print { display: none !important; }
+  .cols { display: block; }
+  .sign {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    aspect-ratio: auto;
+    height: 250mm;
+    padding: 0;
+    page-break-inside: avoid;
+  }
+  .sign__qr { width: 95mm; }
+  .sign__qr canvas { image-rendering: pixelated; }
+}
+</style>
+</head>
+<body>
+
+<!-- Mascots are duplicated here rather than shared with index.html so this
+     file works on its own — a <use href> into another file does not resolve
+     when the page is opened straight off disk. -->
+<svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+  <symbol id="sprite-redpanda" viewBox="0 0 100 100">
+    <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="24" cy="30" r="13" fill="#c2542c"/><circle cx="76" cy="30" r="13" fill="#c2542c"/>
+      <circle cx="24" cy="30" r="6.5" fill="#fbeadd" stroke-width="2.4"/><circle cx="76" cy="30" r="6.5" fill="#fbeadd" stroke-width="2.4"/>
+      <ellipse cx="50" cy="57" rx="33" ry="30" fill="#e2794a"/>
+      <ellipse cx="35" cy="47" rx="11" ry="8" fill="#fdf2e8" stroke="none"/><ellipse cx="65" cy="47" rx="11" ry="8" fill="#fdf2e8" stroke="none"/>
+      <ellipse cx="50" cy="68" rx="19" ry="13" fill="#fdf2e8" stroke="none"/>
+      <ellipse cx="30" cy="66" rx="6" ry="4" fill="#f2a184" stroke="none"/><ellipse cx="70" cy="66" rx="6" ry="4" fill="#f2a184" stroke="none"/>
+      <circle cx="37" cy="50" r="4.4" fill="#2c2340" stroke="none"/><circle cx="63" cy="50" r="4.4" fill="#2c2340" stroke="none"/>
+      <circle cx="38.6" cy="48.4" r="1.5" fill="#fff" stroke="none"/><circle cx="64.6" cy="48.4" r="1.5" fill="#fff" stroke="none"/>
+      <path d="M46.5 62.5h7l-3.5 4z" fill="#2c2340" stroke="none"/>
+      <path d="M50 67.5v3M50 70.5c-2.4 0-3.6-1.6-3.6-1.6M50 70.5c2.4 0 3.6-1.6 3.6-1.6" fill="none" stroke-width="2.4"/>
+    </g>
+  </symbol>
+  <symbol id="sprite-rat" viewBox="0 0 100 100">
+    <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="23" cy="28" r="15" fill="#bdb8cc"/><circle cx="77" cy="28" r="15" fill="#bdb8cc"/>
+      <circle cx="23" cy="28" r="8" fill="#f4b9c6" stroke-width="2.4"/><circle cx="77" cy="28" r="8" fill="#f4b9c6" stroke-width="2.4"/>
+      <ellipse cx="50" cy="58" rx="30" ry="28" fill="#cbc6d8"/>
+      <ellipse cx="50" cy="70" rx="17" ry="12" fill="#eae7f1" stroke="none"/>
+      <path d="M20 62h-10M20 68h-11M21 74h-9M80 62h10M80 68h11M79 74h9" fill="none" stroke-width="2.2"/>
+      <circle cx="38" cy="52" r="4.4" fill="#2c2340" stroke="none"/><circle cx="62" cy="52" r="4.4" fill="#2c2340" stroke="none"/>
+      <circle cx="39.6" cy="50.4" r="1.5" fill="#fff" stroke="none"/><circle cx="63.6" cy="50.4" r="1.5" fill="#fff" stroke="none"/>
+      <ellipse cx="50" cy="65" rx="4.6" ry="3.6" fill="#ef7d9a"/>
+      <path d="M50 68.6v3.4" fill="none" stroke-width="2.4"/>
+      <rect x="46.4" y="72" width="7.2" height="6" rx="1.6" fill="#fffdf6" stroke-width="2.2"/>
+      <path d="M50 72v6" fill="none" stroke-width="1.8"/>
+    </g>
+  </symbol>
+  <symbol id="sprite-monkey" viewBox="0 0 100 100">
+    <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="16" cy="52" r="12" fill="#a2704a"/><circle cx="84" cy="52" r="12" fill="#a2704a"/>
+      <circle cx="16" cy="52" r="6" fill="#e3ae80" stroke-width="2.4"/><circle cx="84" cy="52" r="6" fill="#e3ae80" stroke-width="2.4"/>
+      <circle cx="50" cy="52" r="31" fill="#a2704a"/>
+      <path d="M50 30c-13 0-22 9-22 21 0 14 10 26 22 26s22-12 22-26c0-12-9-21-22-21z" fill="#f2cda2"/>
+      <circle cx="41" cy="49" r="4.4" fill="#2c2340" stroke="none"/><circle cx="59" cy="49" r="4.4" fill="#2c2340" stroke="none"/>
+      <circle cx="42.6" cy="47.4" r="1.5" fill="#fff" stroke="none"/><circle cx="60.6" cy="47.4" r="1.5" fill="#fff" stroke="none"/>
+      <circle cx="46.4" cy="61" r="1.7" fill="#2c2340" stroke="none"/><circle cx="53.6" cy="61" r="1.7" fill="#2c2340" stroke="none"/>
+      <path d="M41 67c3.6 4 14.4 4 18 0" fill="none" stroke-width="2.8"/>
+      <path d="M44 25c1.5-5 5-7 6-7M53 25c-1-4.5.5-7.5 2.5-8.5" fill="none" stroke-width="2.8"/>
+    </g>
+  </symbol>
+  <symbol id="sprite-hummingbird" viewBox="0 0 100 100">
+    <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M18 34c8-4 15-1 18 3M16 44c9-3 16 1 19 5" fill="none" stroke-width="2.2" opacity=".45"/>
+      <path d="M78 78c8 2 14 8 16 14" fill="none" stroke-width="2.2" opacity=".45"/>
+      <path d="M62 66c8 6 16 16 20 26-11-2-21-8-27-16z" fill="#1f8f9e"/>
+      <ellipse cx="52" cy="55" rx="21" ry="17" fill="#2fb8a6" transform="rotate(-24 52 55)"/>
+      <path d="M44 44c-10-6-22-8-30-4 6 8 16 14 26 15z" fill="#63d6c2"/>
+      <circle cx="62" cy="36" r="14" fill="#2fb8a6"/>
+      <path d="M56 46c4 3 9 3 13 0-1 6-5 9-6.5 9S57 52 56 46z" fill="#e8457b" stroke-width="2.6"/>
+      <path d="M73 29 96 19l-20 15z" fill="#3b3350"/>
+      <circle cx="65" cy="33" r="4.2" fill="#2c2340" stroke="none"/>
+      <circle cx="66.6" cy="31.4" r="1.5" fill="#fff" stroke="none"/>
+    </g>
+  </symbol>
+</defs></svg>
+
+
+<div class="wrap">
+
+  <div class="no-print">
+    <h1>QR Code Maker</h1>
+    <p class="lede">
+      Paste the address of your published quiz and this builds a scannable code
+      plus a table sign you can print. Everything runs in this page — no
+      internet needed once the file is on your computer.
+    </p>
+  </div>
+
+  <div class="cols">
+
+    <!-- ---------- Controls ---------- -->
+    <div class="panel no-print">
+      <div class="field">
+        <label for="url">Quiz address
+          <span class="sub">Where the quiz is published — must start with https://</span>
+        </label>
+        <input id="url" type="url" placeholder="https://yourname.github.io/personality-website/"
+               autocomplete="off" spellcheck="false">
+      </div>
+
+      <div class="field">
+        <label for="ecc">Error correction
+          <span class="sub">Higher survives creases and coffee rings, at the cost of a denser code</span>
+        </label>
+        <select id="ecc">
+          <option value="L">Low — 7%</option>
+          <option value="M">Medium — 15%</option>
+          <option value="Q">Quartile — 25%</option>
+          <option value="H" selected>High — 30% (best for print)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="title">Sign heading</label>
+        <input id="title" type="text" value="Which One Are You?" maxlength="46">
+      </div>
+
+      <div class="field">
+        <label for="sub">Sign subheading</label>
+        <input id="sub" type="text" maxlength="90"
+               value="Ten quick questions. Your archetype gets revealed later tonight.">
+      </div>
+
+      <div class="field">
+        <label for="cta">Call to action</label>
+        <input id="cta" type="text" value="Scan to start" maxlength="34">
+      </div>
+
+      <div class="field">
+        <button id="print" class="btn" type="button" disabled>Print the sign</button>
+        <button id="dl-png" class="btn btn--ghost" type="button" disabled>Download QR as PNG</button>
+        <button id="dl-svg" class="btn btn--ghost" type="button" disabled>Download QR as SVG</button>
+      </div>
+
+      <div id="status" class="status status--warn">Paste your quiz address to begin.</div>
+
+      <div class="meta" id="meta" hidden>
+        <dl>
+          <dt>Version</dt><dd id="m-version">—</dd>
+          <dt>Grid</dt><dd id="m-size">—</dd>
+          <dt>Correction</dt><dd id="m-ecc">—</dd>
+          <dt>Print at least</dt><dd id="m-print">—</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- ---------- Preview / printable sign ---------- -->
+    <div>
+      <div class="preview-head no-print">
+        <h2>Table sign</h2>
+        <span>A4 portrait</span>
+      </div>
+
+      <div class="sign" id="sign">
+        <div class="sign__mascots">
+          <svg viewBox="0 0 100 100"><use href="#sprite-redpanda"></use></svg>
+          <svg viewBox="0 0 100 100"><use href="#sprite-rat"></use></svg>
+          <svg viewBox="0 0 100 100"><use href="#sprite-monkey"></use></svg>
+          <svg viewBox="0 0 100 100"><use href="#sprite-hummingbird"></use></svg>
+        </div>
+
+        <h2 class="sign__title" id="s-title">Which One Are You?</h2>
+        <p class="sign__sub" id="s-sub">Ten quick questions. Your archetype gets revealed later tonight.</p>
+
+        <div class="sign__qr is-empty" id="qr-holder">Your QR code will appear here</div>
+
+        <div class="sign__cta" id="s-cta">Scan to start</div>
+        <div class="sign__url" id="s-url"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/qr.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  var urlInput = $('url'), eccInput = $('ecc');
+  var titleInput = $('title'), subInput = $('sub'), ctaInput = $('cta');
+  var holder = $('qr-holder'), status = $('status'), meta = $('meta');
+  var btnPrint = $('print'), btnPng = $('dl-png'), btnSvg = $('dl-svg');
+
+  var current = null;   // { matrix, url }
+
+  function setStatus(text, kind) {
+    status.textContent = text;
+    status.className = 'status status--' + kind;
+  }
+
+  function setButtons(on) {
+    btnPrint.disabled = btnPng.disabled = btnSvg.disabled = !on;
+  }
+
+  function render() {
+    // Live text updates regardless of whether the URL is valid yet.
+    $('s-title').textContent = titleInput.value || ' ';
+    $('s-sub').textContent   = subInput.value;
+    $('s-cta').textContent   = ctaInput.value;
+
+    var url = urlInput.value.trim();
+    $('s-url').textContent = url;
+
+    if (!url) {
+      current = null;
+      holder.className = 'sign__qr is-empty';
+      holder.textContent = 'Your QR code will appear here';
+      setStatus('Paste your quiz address to begin.', 'warn');
+      meta.hidden = true;
+      setButtons(false);
+      return;
+    }
+
+    if (!/^https?:\/\//i.test(url)) {
+      current = null;
+      holder.className = 'sign__qr is-empty';
+      holder.textContent = 'Address needs to start with https://';
+      setStatus('Start the address with https:// — without it, phone cameras ' +
+                'will show the text instead of opening the quiz.', 'err');
+      meta.hidden = true;
+      setButtons(false);
+      return;
+    }
+
+    var level = eccInput.value;
+    var matrix;
+    try {
+      matrix = QR.encode(url, level);
+    } catch (err) {
+      current = null;
+      setStatus(err.message, 'err');
+      setButtons(false);
+      return;
+    }
+
+    current = { matrix: matrix, url: url };
+
+    holder.className = 'sign__qr';
+    holder.textContent = '';
+    var canvas = document.createElement('canvas');
+    QR.toCanvas(canvas, matrix, { size: 1200 });
+    holder.appendChild(canvas);
+
+    // Rule of thumb: a code scans reliably at roughly ten times its width,
+    // so a sign read from ~40cm across a table wants ~4cm of QR.
+    var modules = matrix.length;
+    var minCm = Math.max(3, Math.ceil(modules / 8));
+
+    $('m-version').textContent = 'Version ' + matrix.version;
+    $('m-size').textContent    = modules + ' × ' + modules + ' modules';
+    $('m-ecc').textContent     = level + ' — recovers ' +
+                                 ({ L: '7%', M: '15%', Q: '25%', H: '30%' })[level];
+    $('m-print').textContent   = minCm + ' cm wide';
+    meta.hidden = false;
+
+    setStatus('Ready. Scan the preview with your phone to test it before printing.', 'ok');
+    setButtons(true);
+  }
+
+  function fileStem() {
+    return 'quiz-qr-' + (current ? current.matrix.eccLevel.toLowerCase() : 'code');
+  }
+
+  function download(href, filename) {
+    var a = document.createElement('a');
+    a.href = href;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  btnPng.addEventListener('click', function () {
+    if (!current) return;
+    var canvas = document.createElement('canvas');
+    QR.toCanvas(canvas, current.matrix, { size: 2400 });   // print resolution
+    download(canvas.toDataURL('image/png'), fileStem() + '.png');
+  });
+
+  btnSvg.addEventListener('click', function () {
+    if (!current) return;
+    var svg = QR.toSvg(current.matrix);
+    var blob = new Blob([svg], { type: 'image/svg+xml' });
+    var url = URL.createObjectURL(blob);
+    download(url, fileStem() + '.svg');
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+
+  btnPrint.addEventListener('click', function () { window.print(); });
+
+  [urlInput, eccInput, titleInput, subInput, ctaInput].forEach(function (el) {
+    el.addEventListener('input', render);
+    el.addEventListener('change', render);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
