@@ -11,7 +11,7 @@ const CONFIG = {
      works end to end but nothing is sent anywhere, and the
      scores get logged to the browser console instead. Handy
      for testing the questions before you wire up the Sheet. */
-  endpoint: '',
+  endpoint: 'https://script.google.com/macros/s/AKfycbxOo7kj_Tt5LDnaOu0ANHMUyserfZUH1FqdX5jWylKkT08SySYWAIjDsAaUbY2NL5l-/exec',
 
   /* Ask for the player's real name as well as a display name.
      Set to false if you only want one name field. */
