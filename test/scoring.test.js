@@ -106,7 +106,7 @@ let total = 0;
 const counts = questions.map(q => q.options.length);
 let combos = counts.reduce((a, b) => a * b, 1);
 
-if (combos > 3_000_000) {
+if (combos > 40_000_000) {
   console.log('  (skipped: ' + combos.toLocaleString() + ' combinations is too many)');
 } else {
   const answers = new Array(questions.length).fill(0);

@@ -49,11 +49,13 @@ const URL = 'file://' + path.join(__dirname, '..', 'index.html');
 
   const nextDisabledAfter = await page.isDisabled('#btn-next');
 
-  // Answer the rest, varying picks.
+  // Answer the rest, varying picks. Option counts vary per question
+  // (some have 2, some 3, some 4), so pick within what's actually there.
   const totalQuestions = await page.evaluate(() => QUIZ_DATA.questions.length);
   for (let q = 0; q < totalQuestions; q++) {
     if (q > 0) {
-      const n = (q % 4) + 1;
+      const available = await page.locator('.answer').count();
+      const n = (q % available) + 1;
       await page.click(`.answer:nth-child(${n})`);
       await page.waitForTimeout(90);
     }

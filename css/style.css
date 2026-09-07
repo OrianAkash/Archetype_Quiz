@@ -450,19 +450,20 @@ p:last-child { margin-bottom: 0; }
    rather than shrink tap targets — those stay above 44px.
    ----------------------------------------------------------- */
 @media (max-height: 720px) {
-  .stage { padding: 12px 14px 40px; }
+  .stage { padding: 10px 14px 18px; }
   .mascots svg { width: 62px; height: 62px; }
   .card { padding: 20px 18px; }
   .progress { margin-bottom: 10px; }
-  .question-text { font-size: clamp(18px, 4.8vw, 22px); margin-bottom: 13px; }
-  .answers { gap: 9px; margin-bottom: 13px; }
-  .answer { padding: 11px 13px; }
+  .question-text { font-size: clamp(18px, 4.8vw, 22px); margin-bottom: 11px; }
+  .answers { gap: 8px; margin-bottom: 12px; }
+  .answer { padding: 11px 13px; line-height: 1.3; }
   .credit { display: none; }        /* reclaim the last 20px */
 }
 
 @media (max-width: 361px) {
-  .answer { font-size: 15px; gap: 10px; }
-  .answer__glyph { width: 27px; height: 27px; font-size: 14px; }
+  .answer { font-size: 14.5px; gap: 10px; padding: 10px 12px; }
+  .answer__glyph { width: 26px; height: 26px; font-size: 13px; }
+  .question-text { font-size: 18px; }
   h1 { font-size: 28px; }
 }
 

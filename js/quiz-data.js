@@ -1,206 +1,229 @@
 /* ============================================================
    QUIZ CONTENT  —  this is the ONLY file you need to edit
-   to swap in your real questions.
-   ============================================================
+   to change the questions. See README.md for a full guide.
 
-   HOW SCORING WORKS
-   -----------------
-   Every option carries a `scores` object. When a player picks
-   that option, those points are added to each archetype.
-   At the end, the archetype with the most points wins.
+   13 questions, written by Orian. Scoring is exactly as
+   specified in the source document.
 
-   You can give an option points for more than one archetype.
-   The placeholder set below uses "2 points to the main
-   archetype, 1 point to a close cousin" — that spreads the
-   scores out and makes exact ties much less likely.
+   NOTE ON OPTION ORDER
+   --------------------
+   The source document lists every option in the same order:
+   Red Panda, Rats, Monkey, Humming Bird. Option A is always
+   the red button, so that would have made the red button
+   "Red Panda" on all thirteen questions — players spot that
+   pattern fast and just pick the animal they want.
 
-   IMPORTANT — DON'T LEAK THE ANSWER
-   ---------------------------------
-   Option A is always the red button, B blue, C yellow, D green.
-   If Red Panda were always option A, players would spot the
-   pattern immediately. So the placeholder questions below
-   deliberately shuffle which archetype sits in which slot.
-   Keep doing that when you write the real ones.
-
-   ADDING / REMOVING QUESTIONS
-   ---------------------------
-   Just add or delete objects in the `questions` array. The
-   progress bar, page count and scoring all adapt on their own.
-   Options per question can vary too (2, 3, 4 or 5 all work).
+   The options below are the same options with the same
+   scores, reordered so each archetype lands in each colour
+   slot exactly twice across the 4-option questions. Nothing
+   else changed.
    ============================================================ */
 
 const QUIZ_DATA = {
 
   /* ---- The four archetypes -------------------------------- */
-  /* `id` is used in the scores objects and as the Sheet column
-     order. Change `label` freely; changing `id` means updating
-     every scores object below.                                */
   archetypes: [
     {
       id: 'redPanda',
       label: 'Red Panda',
       sprite: 'sprite-redpanda',
-      blurb: 'Warm, watchful and unhurried. Happiest in a small circle with good snacks.'
+      blurb: 'Comfort, warmth and good company. Treasures the simple moments and the people in them.'
     },
     {
       id: 'rats',
       label: 'Rats',
       sprite: 'sprite-rat',
-      blurb: 'Resourceful and quietly everywhere. Fixes the problem before anyone notices it existed.'
+      blurb: 'Driven and self-improving. Satisfied by progress, effort and getting visibly better at things.'
     },
     {
       id: 'monkey',
       label: 'Monkey',
       sprite: 'sprite-monkey',
-      blurb: 'Loud, funny and impossible to ignore. The reason the room is laughing.'
+      blurb: 'Fun, novelty and momentum. Chasing the next new thing and the story that comes out of it.'
     },
     {
       id: 'hummingbird',
       label: 'Humming Bird',
       sprite: 'sprite-hummingbird',
-      blurb: 'Bright, curious and always mid-flight. Three ideas ahead of the conversation.'
+      blurb: 'Creative and deeply feeling. Drawn to beauty, expression and things that mean something.'
     }
   ],
 
   /* ---- Copy shown on the welcome + finish screens ---------- */
   meta: {
     title: 'Which One Are You?',
-    subtitle: 'Ten quick questions. No wrong answers. Your archetype gets revealed later tonight.',
+    subtitle: 'Thirteen quick questions. No wrong answers. Your archetype gets revealed during the program.',
     startLabel: 'Start the quiz',
     finishHeading: "You're done!",
     finishBody: "You've completed the quiz! Your results have been recorded. Your archetype will be revealed during the program!"
   },
 
-  /* ---- PLACEHOLDER QUESTIONS — swap these out -------------- */
+  /* ---- Questions ------------------------------------------ */
   questions: [
     {
-      text: "It's a free Saturday morning. What actually happens?",
+      // Q1
+      text: "It's a Saturday morning, and you wake up earlier than expected. What's the first thing you think of doing?",
       options: [
-        { text: 'Out the door early — there are three places to be',
-          scores: { hummingbird: 2, monkey: 1 } },
-        { text: 'Slow coffee, blanket, nowhere to be',
-          scores: { redPanda: 2, rats: 1 } },
-        { text: 'Finally fixing the thing that has been annoying me',
-          scores: { rats: 2, redPanda: 1 } },
-        { text: 'Texting everyone to see who wants to do something',
-          scores: { monkey: 2, hummingbird: 1 } }
+        { text: 'Grab a yummy breakfast~',
+          scores: { redPanda: 1 } },
+        { text: 'Hit the gym bright and early!',
+          scores: { rats: 1 } },
+        { text: "Go to that new spot you've found and try something new…",
+          scores: { monkey: 1 } },
+        { text: 'Take it slow, put on a vinyl playlist',
+          scores: { hummingbird: 1 } }
       ]
     },
     {
-      text: 'You walk into a room where you only know one person. You...',
+      // Q2
+      text: "It's your first day in school, and you don't know anyone in your orientation group… What usually happens?",
       options: [
-        { text: 'Find them, park next to them, stay a while',
-          scores: { redPanda: 2, rats: 1 } },
-        { text: 'Do a lap, say hi to everyone, land nowhere',
-          scores: { hummingbird: 2, monkey: 1 } },
-        { text: 'Start a bit with someone and let it escalate',
-          scores: { monkey: 2, hummingbird: 1 } },
-        { text: 'Clock the room first, then pick your moment',
-          scores: { rats: 2, redPanda: 1 } }
+        { text: "You're the first one to start a conversation or a topic.",
+          scores: { rats: 1 } },
+        { text: "You quickly become part of the group's energy and start joking around.",
+          scores: { monkey: 1 } },
+        { text: "You don't necessarily talk first, but once something interests you, you become very engaged.",
+          scores: { hummingbird: 1 } },
+        { text: 'You naturally start chatting with someone nearby and find common ground.',
+          scores: { redPanda: 1 } }
       ]
     },
     {
-      text: 'Group project. Which job do you end up with?',
+      // Q3
+      text: 'Which feeling is the most satisfying?',
       options: [
-        { text: 'Presenting it — obviously',
-          scores: { monkey: 2, hummingbird: 1 } },
-        { text: 'The unglamorous half nobody else wanted',
-          scores: { rats: 2, redPanda: 1 } },
-        { text: 'Keeping everyone calm and fed',
-          scores: { redPanda: 2, rats: 1 } },
-        { text: 'Coming up with eleven ideas, six of them good',
-          scores: { hummingbird: 2, monkey: 1 } }
+        { text: '“That was so much fun, we should do that again”',
+          scores: { monkey: 1 } },
+        { text: "“I made something I'm genuinely proud of”",
+          scores: { hummingbird: 1 } },
+        { text: '“Today was such a nice day”',
+          scores: { redPanda: 1 } },
+        { text: "“I'm actually getting better at this”",
+          scores: { rats: 1 } }
       ]
     },
     {
-      text: 'Long week. How do you recharge?',
+      // Q4
+      text: "You can only choose ONE kind of satisfaction… What's your pick?",
       options: [
-        { text: 'Somewhere new, even if it is just a different route home',
-          scores: { hummingbird: 2, rats: 1 } },
-        { text: 'People. Noise. A long dinner',
+        { text: "I did my best and I'm so proud of myself for that",
+          scores: { rats: 3, monkey: 1 } },
+        { text: 'Everyone I care about is happy, and I got to share that with them',
+          scores: { redPanda: 3, hummingbird: 1 } }
+      ]
+    },
+    {
+      // Q5
+      text: 'What kind of memories do you treasure the most?',
+      options: [
+        { text: 'Simple moments that felt warm and meaningful',
+          scores: { redPanda: 2, hummingbird: 2 } },
+        { text: 'The crazy stories you still laugh about',
           scores: { monkey: 2, redPanda: 1 } },
-        { text: 'A tidy room and an early night',
-          scores: { rats: 2, hummingbird: 1 } },
-        { text: 'One familiar film and zero obligations',
-          scores: { redPanda: 2, monkey: 1 } }
+        { text: 'Moments where you felt proud of yourself or someone else',
+          scores: { rats: 2, hummingbird: 1 } }
       ]
     },
     {
-      text: 'There is a snack table. Be honest.',
+      // Q6
+      text: 'What usually makes you want to keep doing something?',
       options: [
-        { text: 'I have already found the good stuff and told three people',
+        { text: 'I can see myself getting better',
           scores: { rats: 2, monkey: 1 } },
-        { text: 'One plate, one spot, no rush',
-          scores: { redPanda: 2, hummingbird: 1 } },
-        { text: 'Grazing. Constantly. Never a full plate',
-          scores: { hummingbird: 2, rats: 1 } },
-        { text: "I'm holding court next to it rather than eating",
-          scores: { monkey: 2, redPanda: 1 } }
-      ]
-    },
-    {
-      text: 'Someone new joins your circle mid-conversation.',
-      options: [
-        { text: 'Immediately rope them into the joke',
+        { text: "I'm curious about what happens next",
           scores: { monkey: 2, hummingbird: 1 } },
-        { text: 'Quietly shuffle over and make room',
-          scores: { redPanda: 2, rats: 1 } },
-        { text: 'Ask them four questions in ninety seconds',
-          scores: { hummingbird: 2, monkey: 1 } },
-        { text: 'Catch them up on what they missed',
-          scores: { rats: 2, redPanda: 1 } }
+        { text: "I'm enjoying myself and don't feel pressured",
+          scores: { redPanda: 2, hummingbird: 1 } }
       ]
     },
     {
-      text: 'A trip is being planned. Your role?',
+      // Q7
+      text: "It's a family reunion! What do you enjoy most?",
       options: [
-        { text: 'The spreadsheet, the bookings, the backup plan',
-          scores: { rats: 2, redPanda: 1 } },
-        { text: 'I suggested it and I will suggest four more',
-          scores: { hummingbird: 2, monkey: 1 } },
-        { text: 'I show up when told and bring the snacks',
-          scores: { redPanda: 2, rats: 1 } },
-        { text: 'Morale. I am morale',
-          scores: { monkey: 2, hummingbird: 1 } }
+        { text: "Hearing everyone's stories and reminiscing on how things have changed",
+          scores: { hummingbird: 1 } },
+        { text: 'Having the best comfort food cooked by grandma',
+          scores: { redPanda: 1 } },
+        { text: 'Playing games and seeing who wins',
+          scores: { rats: 2 } },
+        { text: 'Recounting funny memories and laughing together',
+          scores: { monkey: 1 } }
       ]
     },
     {
-      text: 'Look around your room right now.',
+      // Q8
+      text: 'What do you wish to have more of in our world today?',
       options: [
-        { text: 'Cosy chaos, but I know where everything is',
-          scores: { redPanda: 2, monkey: 1 } },
-        { text: 'Genuinely a mess and I am rarely in it anyway',
-          scores: { hummingbird: 2, monkey: 1 } },
-        { text: 'Organised in a system only I understand',
-          scores: { rats: 2, hummingbird: 1 } },
-        { text: 'Whatever it looks like, people keep hanging out in it',
-          scores: { monkey: 2, redPanda: 1 } }
+        { text: 'More art and ways to express myself',
+          scores: { hummingbird: 3, redPanda: 1 } },
+        { text: 'More fun things to do and discover',
+          scores: { monkey: 3, rats: 1 } }
       ]
     },
     {
-      text: 'Surprise free hour. No plans, no phone.',
+      // Q9
+      text: 'You suddenly have a whole afternoon free. What would make you feel like you spent it well?',
       options: [
-        { text: 'Nap. Immediately. Unapologetically',
-          scores: { redPanda: 2, rats: 1 } },
-        { text: 'Go find out what is happening somewhere else',
-          scores: { hummingbird: 2, monkey: 1 } },
-        { text: 'Knock out three small things off the list',
-          scores: { rats: 2, redPanda: 1 } },
-        { text: 'Call someone and turn it into a whole thing',
-          scores: { monkey: 2, hummingbird: 1 } }
+        { text: 'Finding a nice place to chill and treating myself to something good',
+          scores: { redPanda: 1 } },
+        { text: "Getting lost in a hobby, playlist, or something I've been inspired to make",
+          scores: { hummingbird: 1 } },
+        { text: "Finally getting around to something I've been meaning to improve at",
+          scores: { rats: 1 } },
+        { text: "Going somewhere I've never been and seeing where the day takes me",
+          scores: { monkey: 1 } }
       ]
     },
     {
-      text: 'How would your friends describe you in one word?',
+      // Q10
+      text: 'Your friends are all free this weekend, but no one has made plans yet. What are you most likely to say?',
       options: [
-        { text: 'Reliable',
-          scores: { rats: 2, redPanda: 1 } },
-        { text: 'Hilarious',
-          scores: { monkey: 2, hummingbird: 1 } },
-        { text: 'Calm',
-          scores: { redPanda: 2, rats: 1 } },
-        { text: 'Everywhere',
-          scores: { hummingbird: 2, monkey: 1 } }
+        { text: 'Guys… shall we go on a hike?',
+          scores: { monkey: 1 } },
+        { text: 'Do yall wanna try this new cafe I found?',
+          scores: { redPanda: 1 } },
+        { text: "Let's watch a movie this weekend!",
+          scores: { hummingbird: 1 } },
+        { text: 'Guys… shall we go do something active this weekend?',
+          scores: { rats: 1 } }
+      ]
+    },
+    {
+      // Q11
+      text: 'Which would you rather have?',
+      options: [
+        { text: 'A life that feels comfortable, fulfilling, and surrounded by people I love',
+          scores: { redPanda: 2, hummingbird: 2 } },
+        { text: 'A life full of growth, new experiences, and things I can look back on proudly',
+          scores: { monkey: 2, rats: 2 } }
+      ]
+    },
+    {
+      // Q12
+      text: 'What type of song sticks to you the most?',
+      options: [
+        { text: 'One that reminds me of people I love',
+          scores: { hummingbird: 1 } },
+        { text: 'A song that gets me pumped for the rest of the day',
+          scores: { rats: 1 } },
+        { text: "Something that surprises me… Like a song that's completely different from what I usually listen to",
+          scores: { monkey: 1 } },
+        { text: 'Something I can really relate to',
+          scores: { redPanda: 1 } }
+      ]
+    },
+    {
+      // Q13
+      text: 'At the end of a really good day, what makes you think “that was worth it”?',
+      options: [
+        { text: 'I accomplished something and feel like I made progress.',
+          scores: { rats: 2 } },
+        { text: "I did something exciting that I'll remember for a long time.",
+          scores: { monkey: 2 } },
+        { text: 'I got to relax, enjoy myself, and spend time with people I love.',
+          scores: { redPanda: 2 } },
+        { text: 'I experienced something beautiful, creative, or emotionally meaningful.',
+          scores: { hummingbird: 2 } }
       ]
     }
   ]
