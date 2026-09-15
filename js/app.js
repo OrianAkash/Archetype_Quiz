@@ -17,7 +17,9 @@
   };
 
   const els = {
+    welcomeEyebrow:$('welcome-eyebrow'),
     welcomeTitle:  $('welcome-title'),
+    welcomeBadge:  $('welcome-badge'),
     welcomeSub:    $('welcome-subtitle'),
     btnStart:      $('btn-start'),
     nameForm:      $('name-form'),
@@ -209,7 +211,10 @@
      Welcome
      ============================================================ */
 
+  // The lockup is three separate pieces of type, so each is its own field.
+  if (els.welcomeEyebrow) els.welcomeEyebrow.textContent = QUIZ_DATA.meta.eyebrow || 'the';
   els.welcomeTitle.textContent = QUIZ_DATA.meta.title;
+  if (els.welcomeBadge) els.welcomeBadge.textContent = QUIZ_DATA.meta.badge || 'personality quiz';
   els.welcomeSub.textContent   = QUIZ_DATA.meta.subtitle;
   els.btnStart.textContent     = QUIZ_DATA.meta.startLabel;
 
@@ -505,7 +510,7 @@
   function confetti() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const colours = ['#ef4d5c', '#2f95dd', '#f4a72c', '#3fb56d', '#ff5f7e', '#8b5cf6'];
+    const colours = ['#902c8f', '#1d7268', '#c0492c', '#97701a', '#fbfcfa', '#e4443c'];
     const frag = document.createDocumentFragment();
 
     for (let i = 0; i < 64; i++) {

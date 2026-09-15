@@ -7,13 +7,13 @@
 <style>
 /* Utility tool, not a showpiece: same palette as the quiz, plainer treatment. */
 :root {
-  --ink: #2c2340;
+  --ink: #173b37;
   --ink-soft: #5b4f78;
   --paper: #fffdf6;
-  --page: #eef1f7;
+  --page: #e8f0ee;
   --line: #d7d2e4;
-  --brand: #ff5f7e;
-  --brand-lip: #d43a5c;
+  --brand: #902c8f;
+  --brand-lip: #6f1f6e;
   --ok: #2a8850;
   --warn: #b4690e;
   --font-display: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
@@ -173,7 +173,7 @@ input:focus, select:focus { outline: 3px solid #1b6fd6; outline-offset: 1px; }
   font-family: var(--font-display);
   font-weight: 700;
   font-size: clamp(15px, 2.2vw, 20px);
-  background: #ffe08a;
+  background: #f2d98a;
   border: 2px solid var(--ink);
   border-radius: 999px;
   padding: 6px 20px;
@@ -212,34 +212,34 @@ input:focus, select:focus { outline: 3px solid #1b6fd6; outline-offset: 1px; }
      when the page is opened straight off disk. -->
 <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
 <symbol id="sprite-turtle" viewBox="0 0 100 100">
-  <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
-    <ellipse cx="12" cy="70" rx="12" ry="8" fill="#57ab52" transform="rotate(-24 12 70)"/>
-    <ellipse cx="88" cy="70" rx="12" ry="8" fill="#57ab52" transform="rotate(24 88 70)"/>
-    <path d="M50 40c22 0 36 15 36 31 0 6-3 9-9 9H23c-6 0-9-3-9-9 0-16 14-31 36-31z" fill="#c98a41"/>
+  <g stroke="#1d4a44" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="12" cy="70" rx="12" ry="8" fill="#e8b53c" transform="rotate(-24 12 70)"/>
+    <ellipse cx="88" cy="70" rx="12" ry="8" fill="#e8b53c" transform="rotate(24 88 70)"/>
+    <path d="M50 40c22 0 36 15 36 31 0 6-3 9-9 9H23c-6 0-9-3-9-9 0-16 14-31 36-31z" fill="#4f9e50"/>
     <path d="M50 46v34M24 62c8-5 17-7 26-7s18 2 26 7M17 73h66" fill="none" stroke-width="2.2" opacity=".5"/>
-    <circle cx="50" cy="35" r="23" fill="#6cc267"/>
-    <ellipse cx="50" cy="44" rx="14" ry="8.5" fill="#8ed489" stroke="none"/>
-    <circle cx="41" cy="33" r="4.4" fill="#2c2340" stroke="none"/>
-    <circle cx="59" cy="33" r="4.4" fill="#2c2340" stroke="none"/>
+    <circle cx="50" cy="35" r="23" fill="#f5c84f"/>
+    <ellipse cx="50" cy="44" rx="14" ry="8.5" fill="#fadc8e" stroke="none"/>
+    <circle cx="41" cy="33" r="4.4" fill="#1d4a44" stroke="none"/>
+    <circle cx="59" cy="33" r="4.4" fill="#1d4a44" stroke="none"/>
     <circle cx="42.6" cy="31.4" r="1.5" fill="#fff" stroke="none"/>
     <circle cx="60.6" cy="31.4" r="1.5" fill="#fff" stroke="none"/>
-    <circle cx="45.5" cy="41.5" r="1.6" fill="#2c2340" stroke="none"/>
-    <circle cx="54.5" cy="41.5" r="1.6" fill="#2c2340" stroke="none"/>
+    <circle cx="45.5" cy="41.5" r="1.6" fill="#1d4a44" stroke="none"/>
+    <circle cx="54.5" cy="41.5" r="1.6" fill="#1d4a44" stroke="none"/>
     <path d="M43 46.5c4 3.6 10 3.6 14 0" fill="none" stroke-width="2.6"/>
   </g>
 </symbol>
 <symbol id="sprite-cat" viewBox="0 0 100 100">
-  <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
-    <path d="M22 36 27 6l19 20z" fill="#f2a054"/>
-    <path d="M78 36 73 6 54 26z" fill="#f2a054"/>
+  <g stroke="#1d4a44" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M22 36 27 6l19 20z" fill="#e4443c"/>
+    <path d="M78 36 73 6 54 26z" fill="#e4443c"/>
     <path d="M29 29 31.5 14l9.5 10z" fill="#f4b6c4" stroke-width="2.2"/>
     <path d="M71 29 68.5 14 59 24z" fill="#f4b6c4" stroke-width="2.2"/>
-    <ellipse cx="50" cy="55" rx="31" ry="28" fill="#f2a054"/>
+    <ellipse cx="50" cy="55" rx="31" ry="28" fill="#e4443c"/>
     <path d="M43 33v6M50 31v7M57 33v6" fill="none" stroke-width="2.4" opacity=".45"/>
     <ellipse cx="42" cy="66" rx="12" ry="9" fill="#fdf1e3" stroke="none"/>
     <ellipse cx="58" cy="66" rx="12" ry="9" fill="#fdf1e3" stroke="none"/>
-    <circle cx="37" cy="52" r="4.6" fill="#2c2340" stroke="none"/>
-    <circle cx="63" cy="52" r="4.6" fill="#2c2340" stroke="none"/>
+    <circle cx="37" cy="52" r="4.6" fill="#1d4a44" stroke="none"/>
+    <circle cx="63" cy="52" r="4.6" fill="#1d4a44" stroke="none"/>
     <circle cx="38.8" cy="50.2" r="1.6" fill="#fff" stroke="none"/>
     <circle cx="64.8" cy="50.2" r="1.6" fill="#fff" stroke="none"/>
     <path d="M46 60.5h8l-4 4.5z" fill="#ef7d9a" stroke-width="2.2"/>
@@ -248,29 +248,29 @@ input:focus, select:focus { outline: 3px solid #1b6fd6; outline-offset: 1px; }
   </g>
 </symbol>
   <symbol id="sprite-monkey" viewBox="0 0 100 100">
-    <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+    <g stroke="#1d4a44" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
       <circle cx="16" cy="52" r="12" fill="#a2704a"/><circle cx="84" cy="52" r="12" fill="#a2704a"/>
       <circle cx="16" cy="52" r="6" fill="#e3ae80" stroke-width="2.4"/><circle cx="84" cy="52" r="6" fill="#e3ae80" stroke-width="2.4"/>
       <circle cx="50" cy="52" r="31" fill="#a2704a"/>
       <path d="M50 30c-13 0-22 9-22 21 0 14 10 26 22 26s22-12 22-26c0-12-9-21-22-21z" fill="#f2cda2"/>
-      <circle cx="41" cy="49" r="4.4" fill="#2c2340" stroke="none"/><circle cx="59" cy="49" r="4.4" fill="#2c2340" stroke="none"/>
+      <circle cx="41" cy="49" r="4.4" fill="#1d4a44" stroke="none"/><circle cx="59" cy="49" r="4.4" fill="#1d4a44" stroke="none"/>
       <circle cx="42.6" cy="47.4" r="1.5" fill="#fff" stroke="none"/><circle cx="60.6" cy="47.4" r="1.5" fill="#fff" stroke="none"/>
-      <circle cx="46.4" cy="61" r="1.7" fill="#2c2340" stroke="none"/><circle cx="53.6" cy="61" r="1.7" fill="#2c2340" stroke="none"/>
+      <circle cx="46.4" cy="61" r="1.7" fill="#1d4a44" stroke="none"/><circle cx="53.6" cy="61" r="1.7" fill="#1d4a44" stroke="none"/>
       <path d="M41 67c3.6 4 14.4 4 18 0" fill="none" stroke-width="2.8"/>
       <path d="M44 25c1.5-5 5-7 6-7M53 25c-1-4.5.5-7.5 2.5-8.5" fill="none" stroke-width="2.8"/>
     </g>
   </symbol>
   <symbol id="sprite-hummingbird" viewBox="0 0 100 100">
-    <g stroke="#2c2340" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
+    <g stroke="#1d4a44" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
       <path d="M18 34c8-4 15-1 18 3M16 44c9-3 16 1 19 5" fill="none" stroke-width="2.2" opacity=".45"/>
       <path d="M78 78c8 2 14 8 16 14" fill="none" stroke-width="2.2" opacity=".45"/>
-      <path d="M62 66c8 6 16 16 20 26-11-2-21-8-27-16z" fill="#1f8f9e"/>
-      <ellipse cx="52" cy="55" rx="21" ry="17" fill="#2fb8a6" transform="rotate(-24 52 55)"/>
-      <path d="M44 44c-10-6-22-8-30-4 6 8 16 14 26 15z" fill="#63d6c2"/>
-      <circle cx="62" cy="36" r="14" fill="#2fb8a6"/>
+      <path d="M62 66c8 6 16 16 20 26-11-2-21-8-27-16z" fill="#4e8f30"/>
+      <ellipse cx="52" cy="55" rx="21" ry="17" fill="#6fb845" transform="rotate(-24 52 55)"/>
+      <path d="M44 44c-10-6-22-8-30-4 6 8 16 14 26 15z" fill="#9ad470"/>
+      <circle cx="62" cy="36" r="14" fill="#6fb845"/>
       <path d="M56 46c4 3 9 3 13 0-1 6-5 9-6.5 9S57 52 56 46z" fill="#e8457b" stroke-width="2.6"/>
-      <path d="M73 29 96 19l-20 15z" fill="#3b3350"/>
-      <circle cx="65" cy="33" r="4.2" fill="#2c2340" stroke="none"/>
+      <path d="M73 29 96 19l-20 15z" fill="#f0a93a"/>
+      <circle cx="65" cy="33" r="4.2" fill="#1d4a44" stroke="none"/>
       <circle cx="66.6" cy="31.4" r="1.5" fill="#fff" stroke="none"/>
     </g>
   </symbol>

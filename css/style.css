@@ -1,37 +1,38 @@
 /* ============================================================
-   ARCHETYPE QUIZ — styles
-   Chunky outlines, flat colour, big press-down buttons.
-   Mobile first: almost everyone will do this on a phone.
+   ARCHETYPE QUIZ — "The Sorting" styles
+   ------------------------------------------------------------
+   Sage ground, oversized italic display type, badge-on-type
+   layering, purple accent. Mobile first.
+
+   Colours sampled from the design mockup:
+     sage #a5ceca · teal #217d72 · purple #902c8f
    ============================================================ */
 
 /* ---------- 1. Tokens ------------------------------------- */
 :root {
-  --ink:        #2c2340;   /* every outline in the whole site   */
-  --ink-soft:   #5b4f78;
-  --paper:      #fffdf6;
-
-  --sky-top:    #a8e5f7;
-  --sky-bottom: #dff5fb;
-  --hill-back:  #a5dd8f;
-  --hill-mid:   #7fca6b;
-  --hill-front: #63b154;
-  --cloud:      #fffdf6;
-
-  --brand:      #ff5f7e;   /* primary button */
-  --brand-lip:  #d43a5c;
+  --sage:       #a5ceca;   /* the ground everything sits on */
+  --sage-deep:  #8fbeb9;   /* inset frame, quiet dividers   */
+  --teal:       #217d72;   /* structure: badges, outlines   */
+  --teal-deep:  #17605a;   /* pressed states, type edge     */
+  --purple:     #902c8f;   /* the one loud accent           */
+  --purple-deep:#6f1f6e;
+  --cream:      #fbfcfa;   /* cards, answer buttons         */
+  --ink:        #173b37;   /* all reading text              */
+  --ink-soft:   #4a6b66;
 
   /* Answer colours are fixed by POSITION, never by archetype,
-     so the palette can never leak the scoring. */
-  --ans-a:      #ef4d5c;  --ans-a-lip: #c22f3d;
-  --ans-b:      #2f95dd;  --ans-b-lip: #1c6ca6;
-  --ans-c:      #f4a72c;  --ans-c-lip: #c67e13;
-  --ans-d:      #3fb56d;  --ans-d-lip: #2a8850;
+     so the palette can never leak the scoring. Each one clears
+     4.5:1 against white, checked rather than guessed. */
+  --ans-a: #8b2b8a;  --ans-a-deep: #6b1f6a;
+  --ans-b: #1d7268;  --ans-b-deep: #12564e;
+  --ans-c: #c0492c;  --ans-c-deep: #97371f;
+  --ans-d: #97701a;  --ans-d-deep: #755511;
 
-  --radius:     22px;
+  --radius:      18px;
   --radius-pill: 999px;
 
-  --font-display: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
-  --font-body:    'Nunito', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Poppins', 'Trebuchet MS', system-ui, sans-serif;
+  --font-mono:    'Space Mono', ui-monospace, 'Courier New', monospace;
 }
 
 /* ---------- 2. Base --------------------------------------- */
@@ -41,45 +42,30 @@ html, body { height: 100%; }
 
 body {
   margin: 0;
-  font-family: var(--font-body);
+  font-family: var(--font-display);
+  font-weight: 500;
   color: var(--ink);
-  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 55%);
-  background-attachment: fixed;
-  min-height: 100vh;      /* fallback for iOS < 15.4 */
-  min-height: 100dvh;     /* tracks the shrinking address bar */
+  background: var(--sage);
+  min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
-  overscroll-behavior-y: contain;   /* no rubber-band revealing the void */
+  overscroll-behavior-y: contain;
   -webkit-tap-highlight-color: transparent;
   text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;   /* stop iOS inflating text in landscape */
+  -webkit-text-size-adjust: 100%;
 }
 
-/* The scenery sits behind everything and never scrolls away. */
-.scenery {
+/* The inset frame from the mockup. Decorative only. */
+body::after {
+  content: '';
   position: fixed;
-  inset: 0;
-  z-index: 0;
+  inset: 7px;
+  border: 2px solid var(--sage-deep);
+  border-radius: 6px;
   pointer-events: none;
-  overflow: hidden;
+  z-index: 3;
 }
-.scenery .hills {
-  position: absolute;
-  bottom: 0; left: 0;
-  width: 100%;
-  height: 26vh;
-  min-height: 170px;
-}
-
-.cloud {
-  position: absolute;
-  fill: var(--cloud);
-  opacity: .95;
-  animation: drift 60s linear infinite;
-}
-@keyframes drift {
-  from { transform: translateX(-12vw); }
-  to   { transform: translateX(112vw); }
-}
+@media (max-width: 480px) { body::after { inset: 5px; } }
 
 /* ---------- 3. Layout ------------------------------------- */
 .stage {
@@ -90,26 +76,25 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* NOT justify-content:center — when content is taller than the viewport
-     (landscape phones), centring a flex child clips its top beyond reach
-     of the scrollbar. Auto margins centre without ever clipping. */
+  /* Auto margins centre without clipping when content is taller
+     than the viewport; justify-content:center would cut the top
+     off beyond the reach of the scrollbar. */
   justify-content: flex-start;
-  padding: 20px 16px 54px;
+  padding: 22px 18px 50px;
 }
 
-.screen { display: none; width: 100%; max-width: 460px; }
+.screen { display: none; width: 100%; max-width: 470px; }
 .screen.is-active {
   display: block;
   margin-block: auto;
-  animation: pop .32s cubic-bezier(.34,1.4,.5,1) both;
+  animation: rise .34s cubic-bezier(.2,.9,.3,1) both;
 }
 
-@keyframes pop {
-  from { opacity: 0; transform: translateY(14px) scale(.97); }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: none; }
 }
 
-/* Respect people who get motion sick. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
@@ -118,138 +103,211 @@ body {
   }
 }
 
-/* ---------- 4. Cards & type ------------------------------- */
+/* ---------- 4. The title lockup --------------------------- */
+/* Eyebrow badge overlapping an oversized italic wordmark, with
+   a mono pill beneath — the mockup's three-part stack. */
+.lockup {
+  position: relative;
+  text-align: center;
+  margin-bottom: 20px;
+  /* Heavy italics paint outside their advance width — the 'g' tail and the
+     slant both overshoot. This gutter keeps the ink off the screen edge. */
+  padding-inline: 10px;
+}
+
+.lockup__eyebrow {
+  display: inline-block;
+  position: relative;
+  z-index: 2;
+  font-weight: 800;
+  font-style: italic;
+  font-size: clamp(26px, 9vw, 44px);
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: #fff;
+  background: var(--teal);
+  border-radius: 14px;
+  padding: 8px 18px 10px;
+  margin-bottom: -14px;
+  margin-right: 34%;
+}
+
+.lockup__word {
+  display: block;
+  position: relative;
+  z-index: 1;
+  font-weight: 900;
+  font-style: italic;
+  font-size: clamp(46px, 17vw, 88px);
+  line-height: .88;
+  letter-spacing: -.045em;
+  color: #fff;
+  /* White on sage is only 1.71:1 — far too low on its own. The
+     dark edge is what makes this readable, not decoration. */
+  -webkit-text-stroke: 2px var(--teal-deep);
+  paint-order: stroke fill;
+  text-shadow: 0 4px 0 rgba(23,59,55,.16);
+  margin: 0;
+}
+
+.lockup__pill {
+  display: inline-block;
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(13px, 3.6vw, 19px);
+  letter-spacing: -.01em;
+  color: #fff;
+  background: var(--purple);
+  border-radius: var(--radius-pill);
+  padding: 7px 20px 8px;
+  margin-top: -3px;
+  margin-left: 12%;
+}
+
+/* Mascots scattered around the lockup, as in the mockup. */
+.lockup__pets { position: absolute; inset: 0; pointer-events: none; }
+.lockup__pets svg {
+  position: absolute;
+  width: clamp(46px, 14vw, 78px);
+  height: auto;
+  filter: drop-shadow(0 3px 0 rgba(23,59,55,.14));
+  animation: float 4.2s ease-in-out infinite;
+}
+.lockup__pets svg:nth-child(1) { left: 0;    top: 6%;     transform: rotate(-8deg); }
+.lockup__pets svg:nth-child(2) { right: 0;   top: -2%;    transform: rotate(7deg);  animation-delay: .5s; }
+.lockup__pets svg:nth-child(3) { left: 2%;   bottom: -4%; transform: rotate(6deg);  animation-delay: 1s; }
+.lockup__pets svg:nth-child(4) { right: 1%;  bottom: -6%; transform: rotate(-6deg); animation-delay: 1.5s; }
+
+@keyframes float {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -7px; }
+}
+
+/* ---------- 5. Cards & type ------------------------------- */
 .card {
-  background: var(--paper);
-  border: 3px solid var(--ink);
+  background: var(--cream);
+  border: 2px solid var(--teal);
   border-radius: var(--radius);
-  box-shadow: 0 7px 0 var(--ink);
-  padding: 26px 22px;
+  box-shadow: 0 5px 0 var(--teal);
+  padding: 24px 22px;
   text-align: center;
 }
 
 h1, h2 {
   font-family: var(--font-display);
   font-weight: 800;
-  line-height: 1.1;
+  font-style: italic;
+  line-height: 1.05;
+  letter-spacing: -.03em;
   margin: 0 0 10px;
-  letter-spacing: -.01em;
+  color: var(--ink);
+  text-wrap: balance;
 }
-h1 { font-size: clamp(30px, 8vw, 42px); }
+h1 { font-size: clamp(28px, 7.5vw, 38px); }
 h2 { font-size: clamp(21px, 5.4vw, 27px); }
 
-p  { margin: 0 0 14px; line-height: 1.5; font-size: 16px; color: var(--ink-soft); }
+p {
+  margin: 0 0 14px;
+  line-height: 1.55;
+  font-size: 15.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
 p:last-child { margin-bottom: 0; }
 
-/* ---------- 5. Buttons ------------------------------------ */
+/* Small mono labels, the mockup's secondary voice. */
+.label {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-transform: lowercase;
+}
+
+/* ---------- 6. Buttons ------------------------------------ */
 .btn {
   display: block;
   width: 100%;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 19px;
+  font-style: italic;
+  font-size: 18px;
+  letter-spacing: -.01em;
   color: #fff;
-  background: var(--brand);
-  border: 3px solid var(--ink);
+  background: var(--purple);
+  border: 2px solid var(--teal-deep);
   border-radius: var(--radius-pill);
-  box-shadow: 0 6px 0 var(--brand-lip);
-  padding: 14px 20px;
+  box-shadow: 0 5px 0 var(--purple-deep);
+  padding: 13px 20px;
   cursor: pointer;
   transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
   -webkit-appearance: none;
-  touch-action: manipulation;   /* kills the 300ms tap delay + double-tap zoom */
+  touch-action: manipulation;
 }
-/* Guarded: on touch screens an unguarded :hover sticks after a tap. */
 @media (hover: hover) {
-  .btn:hover:not(:disabled) { filter: brightness(1.05); }
+  .btn:hover:not(:disabled) { filter: brightness(1.08); }
 }
 .btn:active:not(:disabled) {
-  transform: translateY(5px);
-  box-shadow: 0 1px 0 var(--brand-lip);
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--purple-deep);
 }
-.btn:focus-visible { outline: 4px solid #1b6fd6; outline-offset: 3px; }
-.btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: 0 6px 0 var(--brand-lip); }
+.btn:focus-visible { outline: 3px solid var(--teal-deep); outline-offset: 3px; }
+.btn:disabled { opacity: .42; cursor: not-allowed; }
 
 .btn--ghost {
-  background: var(--paper);
+  background: var(--cream);
   color: var(--ink);
-  box-shadow: 0 6px 0 #cfc6de;
-  font-size: 16px;
+  border-color: var(--teal);
+  box-shadow: 0 5px 0 var(--sage-deep);
+  font-size: 15px;
   padding: 11px 18px;
 }
-.btn--ghost:active:not(:disabled) { box-shadow: 0 1px 0 #cfc6de; }
-
-/* ---------- 6. Welcome screen ----------------------------- */
-.mascots {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 4px;
-  margin-bottom: -14px;
-  position: relative;
-  z-index: 2;
-}
-.mascots svg {
-  width: 74px; height: 74px;
-  filter: drop-shadow(0 3px 0 rgba(44,35,64,.16));
-  animation: bob 3.4s ease-in-out infinite;
-}
-.mascots svg:nth-child(2) { animation-delay: .28s; }
-.mascots svg:nth-child(3) { animation-delay: .56s; }
-.mascots svg:nth-child(4) { animation-delay: .84s; }
-
-@keyframes bob {
-  0%, 100% { transform: translateY(0)    rotate(-1.5deg); }
-  50%      { transform: translateY(-9px) rotate(1.5deg); }
-}
-
-.badge {
-  display: inline-block;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  color: var(--ink);
-  background: #ffe08a;
-  border: 3px solid var(--ink);
-  border-radius: var(--radius-pill);
-  padding: 5px 15px;
-  margin-bottom: 14px;
-  transform: rotate(-2deg);
-}
+.btn--ghost:active:not(:disabled) { box-shadow: 0 1px 0 var(--sage-deep); }
 
 /* ---------- 7. Name form ---------------------------------- */
-.field { text-align: left; margin-bottom: 16px; }
+.field { text-align: left; margin-bottom: 15px; }
 
 .field label {
   display: block;
-  font-family: var(--font-display);
+  font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 12.5px;
+  letter-spacing: .02em;
+  color: var(--teal);
   margin-bottom: 6px;
 }
-.field .hint { font-weight: 400; font-size: 13px; color: var(--ink-soft); }
+.field .hint {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+}
 
 .field input {
   width: 100%;
-  font-family: var(--font-body);
+  font-family: var(--font-display);
+  font-weight: 500;
   font-size: 17px;               /* 16px+ stops iOS auto-zoom on focus */
   color: var(--ink);
   background: #fff;
-  border: 3px solid var(--ink);
-  border-radius: 16px;
-  box-shadow: 0 4px 0 #cfc6de;
-  padding: 12px 14px;
+  border: 2px solid var(--teal);
+  border-radius: 12px;
+  box-shadow: 0 3px 0 var(--sage-deep);
+  padding: 11px 13px;
   touch-action: manipulation;
 }
-.field input:focus { outline: 4px solid #1b6fd6; outline-offset: 2px; }
-.field input.is-invalid { border-color: var(--ans-a); box-shadow: 0 4px 0 var(--ans-a-lip); }
+.field input:focus { outline: 3px solid var(--purple); outline-offset: 1px; }
+.field input.is-invalid { border-color: var(--ans-c); box-shadow: 0 3px 0 var(--ans-c-deep); }
 
 .error {
   display: none;
-  color: var(--ans-a-lip);
-  font-size: 14px;
+  font-family: var(--font-mono);
+  color: var(--ans-c-deep);
+  font-size: 12.5px;
   font-weight: 700;
   margin-top: 6px;
 }
@@ -259,149 +317,155 @@ p:last-child { margin-bottom: 0; }
 .progress { margin-bottom: 14px; text-align: center; }
 
 .progress__label {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--ink);
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: var(--radius-pill);
-  padding: 3px 14px;
   display: inline-block;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: .02em;
+  color: #fff;
+  background: var(--teal);
+  border-radius: var(--radius-pill);
+  padding: 4px 15px;
   margin-bottom: 8px;
 }
 
 .progress__track {
-  height: 15px;
-  background: var(--paper);
-  border: 3px solid var(--ink);
+  height: 10px;
+  background: var(--cream);
+  border: 2px solid var(--teal);
   border-radius: var(--radius-pill);
   overflow: hidden;
 }
 .progress__fill {
   height: 100%;
   width: 0;
-  background: repeating-linear-gradient(45deg, #ffc93c 0 8px, #ffb703 8px 16px);
+  background: var(--purple);
   border-radius: var(--radius-pill);
-  transition: width .35s cubic-bezier(.4,1.3,.5,1);
+  transition: width .35s cubic-bezier(.3,1,.4,1);
 }
 
 .question-text {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(20px, 5.2vw, 25px);
-  line-height: 1.25;
+  font-style: italic;
+  font-size: clamp(20px, 5.2vw, 26px);
+  line-height: 1.2;
+  letter-spacing: -.025em;
   text-align: center;
+  text-wrap: balance;
   margin: 0 0 18px;
-  color: var(--ink);
-  text-shadow: 0 2px 0 rgba(255,255,255,.7);
+  color: #fff;
+  -webkit-text-stroke: 1.4px var(--teal-deep);
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 rgba(23,59,55,.14);
 }
 
-.answers { display: grid; gap: 11px; margin-bottom: 18px; }
+.answers { display: grid; gap: 10px; margin-bottom: 16px; }
 
+/* Cream buttons with a coloured letter chip, rather than four
+   solid colour blocks — keeps the sage/purple scheme calm and
+   gives every answer the same high text contrast. */
 .answer {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
   text-align: left;
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 16px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15.5px;
   line-height: 1.35;
-  color: #fff;
-  border: 3px solid var(--ink);
-  border-radius: 18px;
-  padding: 13px 15px;
+  color: var(--ink);
+  background: var(--cream);
+  border: 2px solid var(--teal);
+  border-radius: 14px;
+  box-shadow: 0 4px 0 var(--sage-deep);
+  padding: 12px 14px;
   cursor: pointer;
-  transition: transform .08s ease, box-shadow .08s ease;
+  transition: transform .08s ease, box-shadow .08s ease, background .12s ease, color .12s ease;
   -webkit-appearance: none;
   touch-action: manipulation;
   -webkit-user-select: none;
-  user-select: none;            /* long-press shouldn't select the answer text */
+  user-select: none;
 }
-.answer:active { transform: translateY(4px); }
-.answer:focus-visible { outline: 4px solid #1b6fd6; outline-offset: 3px; }
+.answer:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--sage-deep); }
+.answer:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
 
 .answer__glyph {
   flex: 0 0 auto;
   width: 30px; height: 30px;
   display: grid;
   place-items: center;
-  background: rgba(255,255,255,.24);
-  border: 2px solid rgba(255,255,255,.65);
   border-radius: 9px;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 15px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  transition: background .12s ease, color .12s ease;
 }
 
-.answer--a { background: var(--ans-a); box-shadow: 0 6px 0 var(--ans-a-lip); }
-.answer--b { background: var(--ans-b); box-shadow: 0 6px 0 var(--ans-b-lip); }
-.answer--c { background: var(--ans-c); box-shadow: 0 6px 0 var(--ans-c-lip); }
-.answer--d { background: var(--ans-d); box-shadow: 0 6px 0 var(--ans-d-lip); }
-.answer--a:active { box-shadow: 0 1px 0 var(--ans-a-lip); }
-.answer--b:active { box-shadow: 0 1px 0 var(--ans-b-lip); }
-.answer--c:active { box-shadow: 0 1px 0 var(--ans-c-lip); }
-.answer--d:active { box-shadow: 0 1px 0 var(--ans-d-lip); }
+.answer--a .answer__glyph { background: var(--ans-a); }
+.answer--b .answer__glyph { background: var(--ans-b); }
+.answer--c .answer__glyph { background: var(--ans-c); }
+.answer--d .answer__glyph { background: var(--ans-d); }
 
-/* Selected state: lift, thicken, add a tick. */
-.answer.is-picked {
-  transform: translateY(3px) scale(1.015);
-  box-shadow: 0 3px 0 var(--ink), 0 0 0 4px #ffe08a;
-}
-.answer.is-picked .answer__glyph {
-  background: #fff;
-  color: var(--ink);
-  border-color: #fff;
-}
+/* Picked: the chip's colour floods the whole button. */
+.answer.is-picked { color: #fff; }
+.answer.is-picked .answer__glyph { background: rgba(255,255,255,.22); }
 .answer.is-picked .answer__glyph::after { content: '✓'; }
 .answer.is-picked .answer__glyph span { display: none; }
 
+.answer--a.is-picked { background: var(--ans-a); border-color: var(--ans-a-deep); box-shadow: 0 4px 0 var(--ans-a-deep); }
+.answer--b.is-picked { background: var(--ans-b); border-color: var(--ans-b-deep); box-shadow: 0 4px 0 var(--ans-b-deep); }
+.answer--c.is-picked { background: var(--ans-c); border-color: var(--ans-c-deep); box-shadow: 0 4px 0 var(--ans-c-deep); }
+.answer--d.is-picked { background: var(--ans-d); border-color: var(--ans-d-deep); box-shadow: 0 4px 0 var(--ans-d-deep); }
+
 .nav { display: flex; gap: 10px; }
 .nav .btn { flex: 1; }
-.nav .btn--ghost { flex: 0 0 96px; }
+.nav .btn--ghost { flex: 0 0 92px; }
 
 /* ---------- 9. Finish screen ------------------------------ */
 .finish-mascots {
   display: flex;
   justify-content: center;
-  gap: 2px;
-  margin-bottom: -10px;
+  gap: 4px;
+  margin-bottom: -6px;
   position: relative;
   z-index: 2;
 }
-.finish-mascots svg { width: 60px; height: 60px; animation: bob 3s ease-in-out infinite; }
-.finish-mascots svg:nth-child(2) { animation-delay: .25s; }
-.finish-mascots svg:nth-child(3) { animation-delay: .5s; }
-.finish-mascots svg:nth-child(4) { animation-delay: .75s; }
+.finish-mascots svg { width: 58px; height: 58px; animation: float 4s ease-in-out infinite; }
+.finish-mascots svg:nth-child(1) { transform: rotate(-7deg); }
+.finish-mascots svg:nth-child(2) { transform: rotate(5deg);  animation-delay: .4s; }
+.finish-mascots svg:nth-child(3) { transform: rotate(-4deg); animation-delay: .8s; }
+.finish-mascots svg:nth-child(4) { transform: rotate(8deg);  animation-delay: 1.2s; }
 
 .finish-name {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 20px;
-  color: var(--brand-lip);
-  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--purple);
+  margin-bottom: 6px;
 }
 
 .tag {
   display: inline-block;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 700;
-  color: var(--ink-soft);
-  background: #f0ebfa;
+  color: var(--teal);
+  background: #e7f1ef;
   border-radius: var(--radius-pill);
-  padding: 5px 13px;
+  padding: 6px 14px;
   margin-top: 12px;
 }
-.tag--warn { background: #ffe6c7; color: #8a5a12; }
+.tag--warn { background: #fbecd9; color: #8a5a12; }
 
 /* ---------- 10. Loading ----------------------------------- */
 .spinner {
-  width: 42px; height: 42px;
+  width: 38px; height: 38px;
   margin: 4px auto 16px;
-  border: 5px solid #e5def2;
-  border-top-color: var(--brand);
+  border: 4px solid var(--sage-deep);
+  border-top-color: var(--purple);
   border-radius: 50%;
   animation: spin .8s linear infinite;
 }
@@ -418,7 +482,7 @@ p:last-child { margin-bottom: 0; }
 .confetti i {
   position: absolute;
   top: -12vh;
-  width: 10px; height: 14px;
+  width: 9px; height: 13px;
   border-radius: 2px;
   animation: fall linear forwards;
 }
@@ -429,53 +493,46 @@ p:last-child { margin-bottom: 0; }
 /* ---------- 12. Footer ------------------------------------ */
 .credit {
   position: fixed;
-  bottom: 10px; left: 0; right: 0;
+  bottom: 12px; left: 0; right: 0;
   z-index: 1;
   text-align: center;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   font-weight: 700;
-  color: rgba(44,35,64,.5);
+  color: rgba(23,59,55,.42);
 }
 
 /* ---------- 13. Larger screens ---------------------------- */
 @media (min-width: 620px) {
-  .mascots svg { width: 92px; height: 92px; }
-  .card { padding: 32px 30px; }
-  .answer { font-size: 17px; padding: 15px 17px; }
+  .card { padding: 30px 30px; }
+  .answer { font-size: 16.5px; padding: 14px 16px; }
+  .lockup { margin-bottom: 26px; }
 }
 
-/* ---------- 14. Small phones -------------------------------
-   Budget Androids (360x640) and folded devices (320px) were
-   scrolling by ~50px on the question screen. Tighten spacing
-   rather than shrink tap targets — those stay above 44px.
-   ----------------------------------------------------------- */
+/* ---------- 14. Small phones ------------------------------ */
 @media (max-height: 720px) {
-  .stage { padding: 10px 14px 18px; }
-  .mascots svg { width: 62px; height: 62px; }
-  .card { padding: 20px 18px; }
+  .stage { padding: 12px 14px 36px; }
+  .card { padding: 18px 16px; }
+  .lockup { margin-bottom: 12px; }
   .progress { margin-bottom: 10px; }
-  .question-text { font-size: clamp(18px, 4.8vw, 22px); margin-bottom: 11px; }
+  .question-text { font-size: clamp(18px, 4.8vw, 22px); margin-bottom: 12px; }
   .answers { gap: 8px; margin-bottom: 12px; }
-  .answer { padding: 11px 13px; line-height: 1.3; }
-  .credit { display: none; }        /* reclaim the last 20px */
+  .answer { padding: 10px 12px; line-height: 1.3; }
+  .credit { display: none; }
 }
 
 @media (max-width: 361px) {
-  .answer { font-size: 14.5px; gap: 10px; padding: 10px 12px; }
+  .answer { font-size: 14.5px; gap: 10px; padding: 10px 11px; }
   .answer__glyph { width: 26px; height: 26px; font-size: 13px; }
   .question-text { font-size: 18px; }
-  h1 { font-size: 28px; }
 }
 
-/* Landscape phones can't fit a quiz screen — let them scroll,
-   but start at the top instead of floating mid-page. */
 @media (max-height: 460px) and (orientation: landscape) {
-  .stage { padding: 10px 14px 20px; }
+  .stage { padding: 10px 14px 18px; }
   .screen.is-active { margin-block: 0; }
-  .mascots { display: none; }
+  .lockup__pets { display: none; }
 }
 
-/* Accessible hiding, for the live region and sprite sheet. */
 .visually-hidden {
   position: absolute !important;
   width: 1px; height: 1px;

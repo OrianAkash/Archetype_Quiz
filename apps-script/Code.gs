@@ -106,8 +106,9 @@ function doPost(e) {
       return json({ ok: true, updated: true, playerId: data.playerId });
     }
 
-    sheet.appendRow(row);
-    return json({ ok: true, created: true, playerId: data.playerId });
+    var target = nextWriteRow(sheet);
+    sheet.getRange(target, 1, 1, row.length).setValues([row]);
+    return json({ ok: true, created: true, row: target, playerId: data.playerId });
 
   } catch (err) {
     return json({ ok: false, error: String(err) });
@@ -178,6 +179,27 @@ function getSheet() {
   }
 
   return sheet;
+}
+
+/** First genuinely empty row to write into.
+ *
+ *  Deliberately NOT appendRow(). That appends "to the bottom of the current
+ *  data region", and clearing cells with the Delete key empties the values
+ *  without shrinking that region — so after wiping test rows, submissions
+ *  land below a block of blank rows instead of at row 2.
+ *
+ *  Scanning the PlayerId column for the last real value is immune to that.
+ *  It writes after the last genuine entry, never into a gap above it — a
+ *  gap could be a row someone is mid-way through editing by hand. */
+function nextWriteRow(sheet) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 2;
+
+  var ids = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
+  for (var i = ids.length - 1; i >= 0; i--) {
+    if (String(ids[i][0]).trim() !== '') return i + 3;   // +2 offset, +1 for next
+  }
+  return 2;
 }
 
 function findRowByPlayerId(sheet, playerId) {
@@ -262,6 +284,21 @@ function updateHeaders() {
   sheet.setFrozenRows(1);
   SpreadsheetApp.getActiveSpreadsheet()
                 .toast('Headers updated to: ' + HEADERS.slice(4, 8).join(', '),
+                       'Archetype quiz', 6);
+}
+
+/** Wipes every response, properly — deletes the rows rather than just
+ *  clearing them, so the next submission really does land on row 2.
+ *  Headers are kept. There is no undo, so be sure. */
+function clearResponses() {
+  var sheet = getSheet();
+  var max = sheet.getMaxRows();
+
+  if (max > 1) sheet.deleteRows(2, max - 1);
+  sheet.insertRowsAfter(1, 200);
+
+  SpreadsheetApp.getActiveSpreadsheet()
+                .toast('All responses cleared. Next submission goes to row 2.',
                        'Archetype quiz', 6);
 }
 

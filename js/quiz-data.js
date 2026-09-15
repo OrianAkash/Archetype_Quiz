@@ -51,8 +51,12 @@ const QUIZ_DATA = {
 
   /* ---- Copy shown on the welcome + finish screens ---------- */
   meta: {
-    title: 'Which One Are You?',
-    subtitle: 'Thirteen quick questions. No wrong answers. Your archetype gets revealed during the program.',
+    /* The opening screen is a three-part lockup:
+       eyebrow badge, big italic word, mono pill. */
+    eyebrow: 'the',
+    title: 'sorting',
+    badge: 'personality quiz',
+    subtitle: 'Thirteen quick questions, no wrong answers. Your archetype gets revealed during the program.',
     startLabel: 'Start the quiz',
     finishHeading: "You're done!",
     finishBody: "You've completed the quiz! Your results have been recorded. Your archetype will be revealed during the program!"
