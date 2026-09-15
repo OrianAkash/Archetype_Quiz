@@ -40,15 +40,15 @@ var SHEET_NAME = 'Responses';
 
 /** Must match the `id` values in quiz-data.js, in the order you
  *  want the score columns to appear. */
-var ARCHETYPE_IDS = ['redPanda', 'rats', 'monkey', 'hummingbird'];
+var ARCHETYPE_IDS = ['turtle', 'cat', 'monkey', 'hummingbird'];
 
 var HEADERS = [
   'Timestamp',
   'PlayerId',
   'PlayerName',
   'RealName',
-  'RedPandaScore',
-  'RatsScore',
+  'TurtleScore',
+  'CatScore',
   'MonkeyScore',
   'HummingBirdScore',
   'PlayerArchetype',
@@ -198,8 +198,8 @@ function rowToObject(row) {
     playerName:      row[2],
     realName:        row[3],
     scores: {
-      redPanda:      row[4],
-      rats:          row[5],
+      turtle:        row[4],
+      cat:           row[5],
       monkey:        row[6],
       hummingbird:   row[7]
     },
@@ -246,6 +246,25 @@ function setup() {
   SpreadsheetApp.getActiveSpreadsheet().toast('Sheet ready.', 'Archetype quiz', 5);
 }
 
+/** Rewrites row 1 to match HEADERS, leaving every data row alone.
+ *
+ *  Run this after renaming an archetype. `setup` only writes headers
+ *  to a brand-new empty tab, so an existing Responses tab would
+ *  otherwise keep the old column names while new rows arrive under
+ *  them — the data would still be correct, but the labels would lie. */
+function updateHeaders() {
+  var sheet = getSheet();
+  sheet.getRange(1, 1, 1, HEADERS.length)
+       .setValues([HEADERS])
+       .setFontWeight('bold')
+       .setBackground('#2c2340')
+       .setFontColor('#ffffff');
+  sheet.setFrozenRows(1);
+  SpreadsheetApp.getActiveSpreadsheet()
+                .toast('Headers updated to: ' + HEADERS.slice(4, 8).join(', '),
+                       'Archetype quiz', 6);
+}
+
 /** Writes one fake row so you can check the columns line up. */
 function addTestRow() {
   doPost({
@@ -256,7 +275,7 @@ function addTestRow() {
         realName: 'Test Person',
         archetype: 'monkey',
         archetypeLabel: 'Monkey',
-        scores: { redPanda: 7, rats: 9, monkey: 14, hummingbird: 6 },
+        scores: { turtle: 7, cat: 9, monkey: 14, hummingbird: 6 },
         tie: false,
         tiedWith: [],
         answers: [0, 1, 2, 3, 0, 1, 2, 3, 0, 1],

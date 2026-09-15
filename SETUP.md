@@ -193,7 +193,7 @@ The API is there when you want it. Replace `<url>` with your `/exec` URL:
 
 ### Sheet columns
 
-`Timestamp · PlayerId · PlayerName · RealName · RedPandaScore · RatsScore ·
+`Timestamp · PlayerId · PlayerName · RealName · TurtleScore · CatScore ·
 MonkeyScore · HummingBirdScore · PlayerArchetype · Tie · TiedWith ·
 Answers · AnswerLabels`
 

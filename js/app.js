@@ -40,6 +40,93 @@
     confetti:      $('confetti')
   };
 
+  const STORAGE_KEY  = 'archetypeQuiz.pending';   // localStorage: failed sends
+  const PROGRESS_KEY = 'archetypeQuiz.progress';  // sessionStorage: this attempt
+  const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const SLOT_CLASS = ['answer--a', 'answer--b', 'answer--c', 'answer--d',
+                      'answer--a', 'answer--b'];
+
+  /* ---------- guard: did quiz-data.js load cleanly? ---------
+     A stray comma or missing brace in quiz-data.js stops the whole
+     file parsing, and without this you'd get a page that looks fine
+     until Start does nothing — with the real reason buried in the
+     browser console. Say it out loud on the page instead.
+     ---------------------------------------------------------- */
+  function checkQuizData() {
+    if (typeof QUIZ_DATA === 'undefined') {
+      return ['js/quiz-data.js could not be read at all. That is almost ' +
+              'always a missing comma, quote or closing brace.'];
+    }
+
+    var problems = [];
+    if (!QUIZ_DATA.questions || !QUIZ_DATA.questions.length) {
+      problems.push('There are no questions in the file.');
+      return problems;
+    }
+    if (!QUIZ_DATA.archetypes || !QUIZ_DATA.archetypes.length) {
+      problems.push('There are no archetypes in the file.');
+      return problems;
+    }
+
+    var ids = QUIZ_DATA.archetypes.map(function (a) { return a.id; });
+
+    QUIZ_DATA.questions.forEach(function (q, i) {
+      var where = 'Question ' + (i + 1);
+      if (!q.text) problems.push(where + ' has no question text.');
+      if (!q.options || q.options.length < 2) {
+        problems.push(where + ' needs at least two options.');
+        return;
+      }
+      q.options.forEach(function (opt, j) {
+        var slot = where + ', option ' + (LETTERS[j] || j + 1);
+        if (!opt.text) problems.push(slot + ' has no text.');
+        if (!opt.scores || !Object.keys(opt.scores).length) {
+          problems.push(slot + ' does not give points to anything.');
+          return;
+        }
+        Object.keys(opt.scores).forEach(function (id) {
+          if (ids.indexOf(id) === -1) {
+            problems.push(slot + ' scores "' + id + '", which is not one of: ' +
+                          ids.join(', '));
+          }
+        });
+      });
+    });
+
+    return problems;
+  }
+
+  function showDataError(problems) {
+    var box = document.createElement('div');
+    box.className = 'card';
+    box.style.textAlign = 'left';
+    box.style.maxWidth = '460px';
+    box.style.margin = '0 auto';
+
+    var list = problems.slice(0, 8).map(function (p) {
+      return '<li>' + p.replace(/</g, '&lt;') + '</li>';
+    }).join('');
+
+    box.innerHTML =
+      '<h2 style="text-align:center">The questions need a fix</h2>' +
+      '<p>Something in <strong>js/quiz-data.js</strong> isn\'t right, so the ' +
+      'quiz can\'t start:</p>' +
+      '<ul style="padding-left:20px;line-height:1.6">' + list + '</ul>' +
+      (problems.length > 8 ? '<p>…and ' + (problems.length - 8) + ' more.</p>' : '') +
+      '<p style="margin-top:12px">Fix the file, save, and reload this page.</p>';
+
+    var stage = document.querySelector('.stage');
+    stage.innerHTML = '';
+    stage.appendChild(box);
+  }
+
+  var dataProblems = checkQuizData();
+  if (dataProblems.length) {
+    showDataError(dataProblems);
+    console.error('quiz-data.js problems:', dataProblems);
+    return;
+  }
+
   /* ---------- state ---------------------------------------- */
   const state = {
     playerId:   makeId(),
@@ -49,12 +136,6 @@
     index:      0,
     submitting: false
   };
-
-  const STORAGE_KEY  = 'archetypeQuiz.pending';   // localStorage: failed sends
-  const PROGRESS_KEY = 'archetypeQuiz.progress';  // sessionStorage: this attempt
-  const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
-  const SLOT_CLASS = ['answer--a', 'answer--b', 'answer--c', 'answer--d',
-                      'answer--a', 'answer--b'];
 
   /* ============================================================
      Helpers

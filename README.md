@@ -1,296 +1,279 @@
-# Archetype Quiz
+# Editing the quiz questions
 
-A Kahoot-styled personality quiz. Players answer one question per screen,
-every answer adds points to four animal archetypes, and the result is saved
-quietly to a Google Sheet so you can reveal it later during the program.
-
-**There is no server to run and nothing to pay for.** A static site plus a
-Google Apps Script web app plus a Sheet does the whole job.
+Everything about the questions lives in one file:
 
 ```
-  Phone browser              Google Apps Script            Google Sheet
-  ┌──────────────┐   POST    ┌──────────────────┐         ┌────────────┐
-  │  index.html  │ ────────► │   doPost()       │ ──────► │  Responses │
-  │  (GitHub     │           │   doGet()        │ ◄────── │            │
-  │   Pages)     │ ◄──────── │                  │  GET    └────────────┘
-  └──────────────┘   JSON    └──────────────────┘
+Archetype_Quiz\js\quiz-data.js
 ```
 
----
+That is the only file you need to open to change what the quiz asks.
 
-## Files
+> **Edit inside `Archetype_Quiz`.** If there is still an older
+> `Personality Website` folder on the computer, it is a leftover copy that is
+> not connected to GitHub. Edits made there will never reach the live site.
 
-| File | What it is |
-|---|---|
-| `index.html` | The quiz — all five screens + the mascot SVGs |
-| `qr-code.html` | **QR code maker + printable table sign** |
-| `css/style.css` | Every style |
-| `js/config.js` | **Your endpoint URL goes here** |
-| `js/quiz-data.js` | **Your questions go here** |
-| `js/scoring.js` | Pure scoring function |
-| `js/app.js` | Screen flow, submission, retry queue |
-| `js/qr.js` | QR encoder (offline, no dependencies) |
-| `apps-script/Code.gs` | The API + database logic |
-| `test/scoring.test.js` | Balance audit — run before the event |
-| `test/mobile.audit.js` | Checks six phone sizes for overflow + tap targets |
-| `test/ui.screens.js` | Clicks through the quiz and screenshots it |
-| `test/qr.verify.js` + `qr_decode.py` | Proves the QR codes actually scan |
-| `dist/quiz-standalone.html` | The whole quiz as one file, if you ever want it |
+Open it in Visual Studio, VS Code, or even Notepad. It is a plain text file.
+
+Everything else — Google Sheet, Apps Script, GitHub, the QR code — is in
+**[SETUP.md](SETUP.md)**.
 
 ---
 
-## Setup — about 15 minutes
-
-### 1. Make the Sheet
-
-1. Go to [sheets.new](https://sheets.new) and name it something like
-   *Mixer Quiz Responses*.
-2. **Extensions → Apps Script**.
-3. Delete the placeholder `myFunction` code and paste in everything from
-   `apps-script/Code.gs`.
-4. Near the top, change `ADMIN_KEY` to a random string of your own. This is
-   what stops a guest who finds the URL from downloading everyone's results
-   mid-event.
-5. Click **Save**, then pick `setup` from the function dropdown and **Run**.
-   Approve the permission prompt (it will warn that the script is
-   unverified — that is normal for your own scripts; choose *Advanced →
-   Go to project*). A `Responses` tab with headers appears in the Sheet.
-
-### 2. Deploy it as an API
-
-1. **Deploy → New deployment**.
-2. Gear icon → **Web app**.
-3. Set:
-   - *Execute as*: **Me**
-   - *Who has access*: **Anyone**  ← must be "Anyone", not "Anyone with a
-     Google account", or guests will hit a login wall
-4. **Deploy**, then copy the Web app URL. It ends in `/exec`.
-
-### 3. Point the site at it
-
-Open `js/config.js` and paste the URL:
-
-```js
-endpoint: 'https://script.google.com/macros/s/AKfycb..../exec',
-```
-
-Leave it as `''` to run in demo mode — the quiz works but nothing is sent.
-
-### 4. Put the site online
-
-Any static host works. GitHub Pages, same as the Le Pet Shop reference:
-
-1. New repo → upload every file, keeping the folder structure.
-2. **Settings → Pages → Source: Deploy from a branch → main / (root)**.
-3. Your quiz is at `https://<username>.github.io/<repo>/` in a minute or two.
-4. Make the QR code — see below.
-
-> **Redeploying:** after you edit `Code.gs`, use **Deploy → Manage
-> deployments → pencil icon → Version: New version**. Creating a *new*
-> deployment instead gives you a different URL and you would have to update
-> `config.js` again.
-
----
-
-## Working on this together
-
-The repo has to be **public** — GitHub Pages only serves from private repos on
-a paid plan. Public means anyone can read every file, so:
-
-- **Never commit the real `ADMIN_KEY`.** It stays as the placeholder in
-  `apps-script/Code.gs`; the real one is typed into the Apps Script editor,
-  which is private to the Google account that owns the Sheet. That key is the
-  only thing standing between a stranger and a list of everyone's real names.
-- The endpoint URL in `js/config.js` is necessarily public — the browser has to
-  call it. Worst case someone posts junk rows, which you can delete from the
-  Sheet. Don't lose sleep over it.
-- Nothing else here is sensitive. The questions and scoring being visible is
-  fine; anyone determined enough to read `quiz-data.js` to game a party quiz
-  has earned their archetype.
-
-**Day-to-day, with two of you:**
-
-1. **Fetch and pull before you start editing.** Every time. Most merge pain
-   comes from skipping this.
-2. **Split the files.** Two people editing `js/quiz-data.js` at once is the
-   one collision that will actually happen — agree who owns the questions and
-   who owns the look, or take turns.
-3. **Commit in small, described chunks.** "Rewrote questions 4-7" beats
-   "update".
-4. If you do collide, GitHub Desktop will say so and show both versions. The
-   file is plain text; pick the lines you want and commit the result.
-
-Committing straight to `main` is fine for two people on something this size.
-Branches and pull requests are worth it once you're afraid of breaking
-something — not before.
-
----
-
-## The QR code
-
-Double-click **`qr-code.html`**. Paste your published quiz address, and you get
-a scannable code plus an A4 table sign with the four mascots on it, ready to
-print.
-
-It runs entirely inside that one page — no website, no account, no internet.
-The QR encoder is written into `js/qr.js` rather than loaded from anywhere, so
-it still works if you end up making the sign in a hall with no wifi.
-
-- **Error correction** defaults to High. That means up to 30% of the code can
-  be obscured — a crease, a thumb, a coffee ring — and it still scans. Leave it
-  on High for anything printed.
-- **Print size** is shown in the panel. The rule of thumb is a code scans from
-  about ten times its own width, so a sign read across a table wants roughly
-  5–6 cm of QR. Bigger is always safer.
-- **Download as SVG** if you're placing the code into a poster in Canva or
-  Illustrator — it stays sharp at any size. PNG is fine for printing directly.
-
-**Test it before you print fifty copies.** Scan the on-screen preview with your
-own phone and check it opens the quiz. A QR code that encodes the wrong URL
-looks exactly like one that encodes the right URL.
-
-> The codes this produces were verified by rendering them and decoding them
-> back with a real scanner library, at every error-correction level and across
-> a range of URL lengths — `node test/qr.verify.js && python3 test/qr_decode.py`
-> if you ever want to re-run that.
-
----
-
-## On phones
-
-The quiz is built for phones first, since that is how everyone will take it.
-
-- Fits without scrolling on everything from a 320px folded phone up
-- Tap targets are all at least 44px tall
-- Text inputs are 17px, so iOS doesn't zoom in when someone taps the name field
-- Uses `dvh` units, so the shrinking Safari address bar doesn't crop the page
-- No sticky hover states, no double-tap zoom, no rubber-band overscroll
-- **If a phone reloads mid-quiz** — backgrounded tab, accidental swipe — the
-  answers come back and the player carries on where they left off. That resume
-  is per browser tab, so a shared phone starts clean for the next person.
-- Landscape works but scrolls; portrait is the intended orientation.
-
-`node test/mobile.audit.js` re-runs those checks across six device sizes and
-writes screenshots to `shots/mobile/`.
-
----
-
-## Writing your real questions
-
-Everything lives in `js/quiz-data.js`. Each option carries a `scores` object:
+## What a question looks like
 
 ```js
 {
-  text: 'Slow coffee, blanket, nowhere to be',
-  scores: { redPanda: 2, rats: 1 }
-}
+  text: "It's a free Saturday morning. What actually happens?",
+  options: [
+    { text: 'Out the door early — there are three places to be',
+      scores: { hummingbird: 2, monkey: 1 } },
+    { text: 'Slow coffee, blanket, nowhere to be',
+      scores: { turtle: 2, cat: 1 } },
+    { text: 'Finally fixing the thing that has been annoying me',
+      scores: { cat: 2, turtle: 1 } },
+    { text: 'Texting everyone to see who wants to do something',
+      scores: { monkey: 2, hummingbird: 1 } }
+  ]
+},
 ```
 
-The placeholder set gives **2 points to the main archetype and 1 to a close
-cousin**. That is deliberate: pure 2/0/0/0 scoring produces a lot of exact
-ties. Add or delete questions freely — the progress bar, page count and
-scoring all adapt on their own.
+Three parts:
 
-**One rule worth keeping:** option A is always the red button, B blue,
-C yellow, D green. If Red Panda were always option A, people would crack the
-pattern by question four. Shuffle which archetype sits in which slot, and
-run the audit below to confirm you did.
+| Part | What it does |
+|---|---|
+| `text:` on the question | The question shown at the top of the screen |
+| `text:` on an option | The wording on one of the coloured buttons |
+| `scores:` | How many points that answer gives to each archetype |
 
-### Check your questions before the event
+---
+
+## Changing the wording
+
+Change what is between the quote marks. Nothing else.
+
+```js
+text: 'Slow coffee, blanket, nowhere to be',
+```
+becomes
+```js
+text: 'A slow morning with a good book',
+```
+
+**If your text contains an apostrophe**, wrap it in double quotes instead so
+the apostrophe doesn't end the text early:
+
+```js
+text: "I'd rather be outside",     // double quotes — correct
+text: 'I'd rather be outside',     // single quotes — BREAKS
+```
+
+That single mistake is the most common way to break the file.
+
+---
+
+## Adding a question
+
+1. Find any existing question block — everything from `{` down to `},`
+2. Copy the whole block, including the closing `},`
+3. Paste it directly after another question
+4. Rewrite the text and adjust the scores
+
+Add as many as you like. **You do not need to update a count anywhere.** The
+"Question 3 of 10" label, the progress bar and the scoring all read the list
+and adjust themselves.
+
+**The one comma that matters is the one between two questions.** The last
+question in the file has no comma after it, so if you paste a new question
+below it, the one that used to be last now needs its comma back:
+
+```js
+  {
+    text: 'Used to be the last question',
+    options: [ ... ]
+  },                                  ← this comma is now required
+  {
+    text: 'The new last question',
+    options: [ ... ]
+  }
+]
+```
+
+Leaving a comma on the very last one is harmless — browsers accept it. Missing
+one *between* two questions is what breaks the file.
+
+## Deleting a question
+
+Delete the whole block from `{` down to its closing `},`.
+
+## Reordering
+
+Cut and paste whole blocks. Order in the file is the order players see.
+
+---
+
+## How the scoring works
+
+The four archetypes, spelled exactly like this:
+
+```
+turtle        cat       monkey      hummingbird
+```
+
+All lower case, one word. These are case-sensitive — `Turtle` or `cats`
+will not work, and the page will tell you so.
+
+Every option hands out points:
+
+```js
+scores: { turtle: 2, cat: 1 }
+```
+
+That answer gives Turtle 2 points and Cat 1. At the end, whoever has the
+most points wins, and that is the player's archetype.
+
+### The 2-and-1 convention
+
+Every option in the placeholder set gives **2 points to its main archetype and
+1 to a close cousin**. Keep doing that.
+
+The obvious alternative — 2 points to one archetype and nothing to anyone
+else — sounds cleaner but produces far more exact ties, which means more
+coin-flips when you are reading out results. Spreading a single point around
+separates people much better.
+
+You can give points to three archetypes, or give 3 points instead of 2, if a
+particular answer really is that strong. Nothing breaks.
+
+### The one rule that matters
+
+**Option A is always the red button. B is blue, C is yellow, D is green.**
+
+So if Turtle were always option A, people would notice by question four
+and just pick the animal they want. Shuffle which archetype sits in which
+position as you write.
+
+Scan down the file and check you have not fallen into a pattern. There is a
+script that checks this for you — see below.
+
+---
+
+## Changing the words on the welcome and finish screens
+
+Also in `quiz-data.js`, near the top, in the `meta` block:
+
+```js
+meta: {
+  title: 'Which One Are You?',
+  subtitle: 'Ten quick questions. No wrong answers. ...',
+  startLabel: 'Start the quiz',
+  finishHeading: "You're done!",
+  finishBody: "You've completed the quiz! Your results have been recorded. ..."
+},
+```
+
+## Renaming an archetype
+
+The `label` is what people see. The `id` is what the scoring uses.
+
+```js
+{
+  id: 'turtle',              ← leave this alone
+  label: 'Turtle',           ← change this freely
+  sprite: 'sprite-turtle',   ← which drawing to use
+  blurb: 'Comfort, warmth and good company...'
+},
+```
+
+Changing a `label` is safe — it's only what players and the Sheet display.
+Changing an `id` means updating every `scores` block that mentions it *and*
+the `ARCHETYPE_IDS` and `HEADERS` lists in `apps-script/Code.gs`, so it is
+rarely worth doing on your own.
+
+---
+
+## Checking your work
+
+### The page tells you when something is wrong
+
+Save the file, then open `index.html` by double-clicking it and refresh. If
+something is broken you get a plain message naming the problem:
+
+> **The questions need a fix**
+> - Question 7, option B scores "turtel", which is not one of: turtle,
+>   cat, monkey, hummingbird
+
+It catches missing commas and quotes, misspelled archetype names, blank
+options, and options that score nothing. If the quiz starts normally, the file
+is fine.
+
+You do not need to push to GitHub to test. Opening `index.html` from your own
+disk runs the real quiz — it just won't record anything anywhere.
+
+### Checking the balance
+
+Once your real questions are written, if you have Node installed:
 
 ```bash
 node test/scoring.test.js
 ```
 
-It walks **every possible combination of answers** and reports which
-archetype each one produces. The current placeholder set:
+This plays **every possible combination of answers** — over a million of
+them — and reports how often each archetype comes out on top:
 
 ```
-redPanda      26.6%
-rats          22.3%
+turtle      26.6%
+cat          22.3%
 monkey        27.6%
 hummingbird   23.5%
 ```
 
-Anything in roughly the 15–35% band is healthy. If one archetype is at 60%
-you have accidentally written a quiz where everyone is a Monkey; if one is at
-2% nobody will ever get it. The script also fails if an archetype is glued to
-one answer position.
+Roughly **15–35% each** is healthy.
 
-To see it in a browser with screenshots of each screen:
-
-```bash
-npm install playwright && node test/ui.screens.js
-```
-
----
-
-## Reading the results
-
-The Sheet is the answer to most questions — sort or filter the
-`PlayerArchetype` column and you have your reveal list.
-
-The API is there when you want it. Replace `<url>` with your `/exec` URL:
-
-| Request | Returns |
+| What you see | What it means |
 |---|---|
-| `<url>?playerId=abc123` | One participant's full result |
-| `<url>?key=YOURKEY&all=1` | Every result as JSON |
-| `<url>?key=YOURKEY&summary=1` | Counts per archetype |
-| `<url>` | Health check |
+| One archetype at 60% | Too many answers point the same way — everyone will be a Monkey |
+| One archetype at 2% | Nobody will ever get it — give it more strong answers |
+| A "glued to one position" failure | One archetype keeps landing in the same lettered slot |
 
-### Sheet columns
-
-`Timestamp · PlayerId · PlayerName · RealName · RedPandaScore · RatsScore ·
-MonkeyScore · HummingBirdScore · PlayerArchetype · Tie · TiedWith ·
-Answers · AnswerLabels`
-
-`Answers` keeps the raw option indexes, so if you ever change the scoring
-weights you can recompute every past result rather than losing them.
+Worth running before the event. A quiz where nobody comes out a Hummingbird is
+not obvious from reading the questions, but it is obvious from this.
 
 ---
 
-## Things that will come up on the night
+## Putting your changes live
 
-**Ties.** Two archetypes can finish level. The tiebreak is *whoever scored
-across more questions* — a broad fit beats one lucky spike. It is
-deterministic, so it never flip-flops. Any genuine tie is marked `YES` in the
-**Tie** column with the contenders in **TiedWith**, so you can hand-pick
-during the reveal instead of letting the code decide.
+1. Save the file
+2. Open **GitHub Desktop** — your edits appear in the left panel
+3. Write a summary, e.g. *"Rewrote questions 4–7"*
+4. **Commit to main**, then **Push origin**
+5. Wait about a minute, then hard-refresh
+   (**Ctrl+Shift+R**) at
+   https://orianakash.github.io/Archetype_Quiz/
 
-**Patchy wifi.** If a submission fails it is saved in that phone's browser
-and retried the next time the page is opened, and the player sees an honest
-"saved on this device" note rather than a false confirmation.
+Browsers cache aggressively — if you don't see your change, hard-refresh
+before assuming something went wrong.
 
-**Someone submits twice.** Rows are keyed on `playerId`, so a retry
-overwrites rather than duplicating. Note that a player who fully reloads the
-page gets a *new* id and will appear twice — dedupe on `RealName` if that
-happens.
+### If two of you are editing
 
-**A guest finds the Sheet URL.** They can't: the Sheet itself is private to
-your Google account. The web app runs as *you*, which is how it writes
-without the player needing to log in. Only the `playerId` lookup is public,
-and it needs an id you'd have to already know.
-
-**Nothing is arriving.** Check, in order: `config.js` has the `/exec` URL;
-the deployment's access is set to **Anyone**; and you made a *new version*
-after your last `Code.gs` edit. The browser console on the quiz page will
-show the actual error.
+**Fetch and pull before you start.** Every time. Two people editing
+`quiz-data.js` at the same time is the one collision that will actually
+happen — agree who owns the questions and who owns the styling, or take
+turns.
 
 ---
 
-## Customising the look
+## Quick reference
 
-- **Colours** — the `:root` block at the top of `css/style.css`. `--brand`
-  is the main button; `--ans-a` through `--ans-d` are the four answer
-  colours (fixed by position, so they can never leak the scoring).
-- **Mascots** — the four `<symbol>` blocks at the top of `index.html`.
-  Flat vector, one `<symbol>` each; swap the `fill` values or drop in your
-  own SVG.
-- **Fonts** — Baloo 2 and Nunito, loaded from Google Fonts in `index.html`.
-- **Copy** — the `meta` block in `js/quiz-data.js` holds the welcome and
-  completion text.
-
-Keyboard shortcuts are already wired up: **1–4** or **A–D** to answer,
-**Enter** to advance. Handy if you ever run it off a laptop on the big
-screen.
+| I want to… | Do this |
+|---|---|
+| Change a question | Edit the `text:` between the quotes |
+| Add a question | Copy a whole `{ ... },` block, paste, rewrite |
+| Remove a question | Delete the block including its comma |
+| Reorder | Cut and paste whole blocks |
+| Change which archetype an answer favours | Edit its `scores:` line |
+| Rename an archetype | Change its `label`, not its `id` |
+| Change the welcome or finish text | The `meta` block near the top |
+| Use an apostrophe in text | Wrap the text in "double quotes" |
+| Test it | Open `index.html` and refresh |
+| Check the balance | `node test/scoring.test.js` |
+| Publish | Commit and push in GitHub Desktop |
