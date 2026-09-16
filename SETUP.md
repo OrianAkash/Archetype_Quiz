@@ -27,7 +27,8 @@ Apps Script web app, and a Sheet do the whole job.
 
 | File | What it is |
 |---|---|
-| `index.html` | The quiz — all five screens + the mascot SVGs |
+| `index.html` | The quiz — all five screens |
+| `img/` | The four character illustrations (PNG, transparent) |
 | `qr-code.html` | QR code maker + printable table sign |
 | `css/style.css` | Every style |
 | `js/config.js` | **Your endpoint URL goes here** |

@@ -26,25 +26,25 @@ const QUIZ_DATA = {
     {
       id: 'turtle',
       label: 'Turtle',
-      sprite: 'sprite-turtle',
+      image: 'img/turtle.png',
       blurb: 'Comfort, warmth and good company. Unhurried, and treasures the simple moments and the people in them.'
     },
     {
       id: 'cat',
       label: 'Cat',
-      sprite: 'sprite-cat',
+      image: 'img/cat.png',
       blurb: 'Quietly driven. Satisfied by progress, effort and getting visibly better at things.'
     },
     {
       id: 'monkey',
       label: 'Monkey',
-      sprite: 'sprite-monkey',
+      image: 'img/monkey.png',
       blurb: 'Fun, novelty and momentum. Chasing the next new thing and the story that comes out of it.'
     },
     {
       id: 'hummingbird',
       label: 'Humming Bird',
-      sprite: 'sprite-hummingbird',
+      image: 'img/hummingbird.png',
       blurb: 'Creative and deeply feeling. Drawn to beauty, expression and things that mean something.'
     }
   ],

@@ -18,6 +18,16 @@ const FONT_LINK = /<link rel="preconnect"[\s\S]*?rel="stylesheet">/;
 const FONT_IMPORT =
   "@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;700;800&display=swap');";
 
+/* Inline the character art as data URIs. Only the standalone build needs
+   this — the artifact build publishes img/ alongside the page, and the real
+   site just serves the files. */
+function inlineImages(html) {
+  return html.replace(/src="(img\/[^"]+\.png)"/g, (m, rel) => {
+    const b64 = fs.readFileSync(path.join(root, rel)).toString('base64');
+    return 'src="data:image/png;base64,' + b64 + '"';
+  });
+}
+
 /* ---- 1. Standalone: a complete document, works from a file:// ---- */
 let standalone = html
   .replace('<link rel="stylesheet" href="css/style.css">', '<style>\n' + css + '\n</style>')
@@ -25,7 +35,7 @@ let standalone = html
   .replace('<script src="js/app.js"></script>', '<script>\n' + js + '\n</script>');
 
 fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
-fs.writeFileSync(path.join(root, 'dist/quiz-standalone.html'), standalone);
+fs.writeFileSync(path.join(root, 'dist/quiz-standalone.html'), inlineImages(standalone));
 
 /* ---- 2. Artifact page: no doctype/html/head/body wrapper -------- */
 const bodyInner = standalone
